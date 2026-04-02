@@ -1,6 +1,8 @@
 import { ActionButton } from "../components/ActionButton";
 import BottomNav from "../components/BottomNav";
 import Head from "../components/Head";
+import Link from "next/link";
+import TransactionItem from "@/app/ui/components/TransactionItem";
 
 export default function Dashboard() {
   return (
@@ -15,9 +17,9 @@ export default function Dashboard() {
           </p>
           <div className="inline-flex items-baseline gap-1">
             <span className="text-primary-fixed-dim font-black text-6xl tracking-tighter">
-              $142.85
+              ₱142.85
             </span>
-            <span className="text-primary font-bold text-xl">USD</span>
+            <span className="text-primary font-bold text-xl">PHP</span>
           </div>
           <div className="mt-4 flex justify-center">
             <div className="bg-surface-container-high px-4 py-1.5 rounded-full flex items-center gap-2">
@@ -63,7 +65,7 @@ export default function Dashboard() {
               <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">
                 Daily Goal
               </p>
-              <p className="text-on-surface text-sm font-bold">$142 / $200</p>
+              <p className="text-on-surface text-sm font-bold">₱142 / ₱200</p>
             </div>
           </div>
           {/* <!-- Expense Ratio --> */}
@@ -99,7 +101,7 @@ export default function Dashboard() {
               <p className="text-on-surface-variant text-[10px] font-bold uppercase tracking-widest">
                 Fuel vs Income
               </p>
-              <p className="text-on-surface text-sm font-bold">$35.50 Exp.</p>
+              <p className="text-on-surface text-sm font-bold">₱35.50 Exp.</p>
             </div>
           </div>
         </div>
@@ -109,81 +111,33 @@ export default function Dashboard() {
             <h3 className="text-on-surface font-black text-lg tracking-tight uppercase">
               Recent Logs
             </h3>
-            <span className="text-primary font-bold text-xs uppercase tracking-widest">
-              View All
-            </span>
+            <Link href="/dashboard/ViewAll">
+              <span className="text-primary font-bold text-xs uppercase tracking-widest">
+                View All
+              </span>
+            </Link>
           </div>
           <div className="space-y-3">
-            <div className="bg-surface-container rounded-xl p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
-                <span className="material-symbols-outlined text-primary-fixed">
-                  local_gas_station
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-on-surface font-bold text-sm">Fuel Refill</p>
-                <p className="text-on-surface-variant text-xs font-medium">
-                  Shell Station • 2:14 PM
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-error font-black text-sm">-$18.50</p>
-              </div>
-            </div>
-            <div className="bg-surface-container rounded-xl p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
-                <span className="material-symbols-outlined text-secondary">
-                  sports_motorsports
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-on-surface font-bold text-sm">
-                  Large Delivery Tip
-                </p>
-                <p className="text-on-surface-variant text-xs font-medium">
-                  Order #8821 • 1:45 PM
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-secondary font-black text-sm">+$12.00</p>
-              </div>
-            </div>
-            <div className="bg-surface-container rounded-xl p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
-                <span className="material-symbols-outlined text-secondary">
-                  sports_motorsports
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-on-surface font-bold text-sm">
-                  Large Delivery Tip
-                </p>
-                <p className="text-on-surface-variant text-xs font-medium">
-                  Order #8821 • 1:45 PM
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-secondary font-black text-sm">+$12.00</p>
-              </div>
-            </div>
-            <div className="bg-surface-container rounded-xl p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
-                <span className="material-symbols-outlined text-secondary">
-                  sports_motorsports
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-on-surface font-bold text-sm">
-                  Large Delivery Tip
-                </p>
-                <p className="text-on-surface-variant text-xs font-medium">
-                  Order #8821 • 1:45 PM
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-secondary font-black text-sm">+$12.00</p>
-              </div>
-            </div>
+            <TransactionItem
+              title="Maintenance"
+              subtitle="Motor Shop • 10:00 AM"
+              amount="500"
+              icon="build"
+              currency="₱"
+            />
+            <TransactionItem
+              title="Delivery Income"
+              subtitle="Grab • 6:30 PM"
+              amount="250.00"
+              icon="payments"
+              negative={false}
+            />
+            <TransactionItem
+              title="Fuel Refill"
+              subtitle="Shell Station • 2:14 PM"
+              amount="18.50"
+              icon="local_gas_station"
+            />
           </div>
         </section>
         <ActionButton label="Start Shift" icon="power_settings_new" />

@@ -22,7 +22,7 @@ export default function Head() {
           </h1>
         </div>
         <div className="flex items-center">
-          <button className="text-[#adaaaa] hover:bg-[#20201f] transition-colors p-2 rounded-full active:scale-95 duration-150">
+          <button className="text-[#adaaaa] hover:bg-[#20201f] transition-colors p-2 rounded-full active:scale-95 duration-150 cursor-pointer active:scale-95 transitioncursor-pointer">
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <SettingsButton onOpen={() => setOpen(true)} />

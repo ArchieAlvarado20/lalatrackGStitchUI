@@ -1,4 +1,3 @@
-import Image from "next/image";
 import "@/app/globals.css";
 import Link from "next/link";
 
@@ -379,35 +378,6 @@ export default function Home() {
           </p>
         </div>
       </footer>
-      {/* <!-- Bottom Navigation Bar (Mobile Only) --> */}
-      <nav className="md:hidden fixed bottom-0 w-full rounded-t-2xl z-50 pb-safe bg-[#131313]/90 backdrop-blur-2xl dark:bg-[#131313]/90 shadow-[0_-4px_20px_0_rgba(0,0,0,0.5)]">
-        <div className="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 h-20">
-          <div className="flex flex-col items-center justify-center bg-[#2c2c2c] text-[#ff9061] rounded-xl px-4 py-2 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.4),inset_-1px_-1px_2px_rgba(255,255,255,0.05)]">
-            <span className="material-symbols-outlined">directions_car</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest font-['Inter']">
-              Drive
-            </span>
-          </div>
-          <div className="flex flex-col items-center justify-center text-[#adaaaa] px-4 py-2 hover:text-[#F26722] transition-all">
-            <span className="material-symbols-outlined">payments</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest font-['Inter']">
-              Earnings
-            </span>
-          </div>
-          <div className="flex flex-col items-center justify-center text-[#adaaaa] px-4 py-2 hover:text-[#F26722] transition-all">
-            <span className="material-symbols-outlined">receipt_long</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest font-['Inter']">
-              Expenses
-            </span>
-          </div>
-          <div className="flex flex-col items-center justify-center text-[#adaaaa] px-4 py-2 hover:text-[#F26722] transition-all">
-            <span className="material-symbols-outlined">person</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest font-['Inter']">
-              Profile
-            </span>
-          </div>
-        </div>
-      </nav>
     </>
   );
 }

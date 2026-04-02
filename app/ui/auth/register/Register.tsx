@@ -1,139 +1,133 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import HeadAuth from "../HeadAuth";
 import SecurityBadges from "../SecurityBadges";
+import AuthActions from "../AuthActions";
 
 export default function Register() {
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+
   return (
     <>
       <HeadAuth />
       <div className="min-h-screen flex-colitems-center justify-center bg-surface">
-        {/* // <!-- Main Login Content (Middle/Bottom heavy for one-handed use) --> */}
         <main className="flex-grow flex flex-col justify-end px-6 pb-6 max-w-md mx-auto w-full">
           <div className="space-y-6">
-            {/* // <!-- Input Group --> */}
             <div className="space-y-4">
+              {/* Email */}
               <div className="group">
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">
-                  Gmail
+                  Name
                 </label>
                 <div className="relative flex items-center">
-                  <span
-                    className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl"
-                    data-icon="person"
-                  >
+                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
                     person
                   </span>
                   <input
+                    name="name"
+                    autoComplete="name"
                     className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-4 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="Enter Gmail"
+                    placeholder="Enter your Name"
                     type="email"
                   />
                 </div>
               </div>
-              <div className="group">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">
-                  Gmail
-                </label>
-                <div className="relative flex items-center">
-                  <span
-                    className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl"
-                    data-icon="person"
-                  >
-                    person
-                  </span>
-                  <input
-                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-4 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="Enter Gmail"
-                    type="email"
-                  />
-                </div>
-              </div>
-              <div className="group">
-                <div className="flex justify-between items-end mb-2 ml-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    Password
-                  </label>
-                </div>
-                <div className="relative flex items-center">
-                  <span
-                    className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl"
-                    data-icon="lock"
-                  >
-                    lock
-                  </span>
-                  <input
-                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-12 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="••••••••"
-                    type="password"
-                  />
-                  <button className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors">
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      data-icon="visibility"
-                    >
-                      visibility
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <div className="group">
-                <div className="flex justify-between items-end mb-2 ml-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    Password
-                  </label>
-                </div>
-                <div className="relative flex items-center">
-                  <span
-                    className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl"
-                    data-icon="lock"
-                  >
-                    lock
-                  </span>
-                  <input
-                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-12 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="••••••••"
-                    type="password"
-                  />
-                  <button className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors">
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      data-icon="visibility"
-                    >
-                      visibility
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            {/* // <!-- Action Cluster (Thumb Zone) --> */}
-            <div className="pt-4 space-y-4">
-              <button className="w-full bg-primary-container from-primary to-primary-container text-on-primary-container font-black py-5 rounded-xl text-lg neumorphic-button uppercase tracking-wider transition-all active:scale-95">
-                Register
-              </button>
 
-              <div className="flex items-center gap-4 py-2">
-                <div className="h-px bg-surface-variant flex-grow"></div>
-                <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
-                  or
-                </span>
-                <div className="h-px bg-surface-variant flex-grow"></div>
+              {/* Confirm Email */}
+              <div className="group">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">
+                  Email
+                </label>
+                <div className="relative flex items-center">
+                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
+                    mail
+                  </span>
+                  <input
+                    name="confirmEmail"
+                    autoComplete="email"
+                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-4 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
+                    placeholder="Enter Email"
+                    type="email"
+                  />
+                </div>
               </div>
-              <button className="w-full bg-surface-container-high text-on-surface font-bold py-4 rounded-xl text-sm border border-outline-variant/10 hover:bg-surface-bright transition-all active:scale-95 flex items-center justify-center gap-2">
-                <span
-                  className="material-symbols-outlined text-xl text-primary"
-                  data-icon="dialpad"
-                >
-                  dialpad
-                </span>
-                LOGIN WITH OTP
-              </button>
+
+              {/* Password */}
+              <div className="group">
+                <div className="flex justify-between items-end mb-2 ml-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                    Password
+                  </label>
+                </div>
+                <div className="relative flex items-center">
+                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
+                    lock
+                  </span>
+                  <input
+                    name="password"
+                    autoComplete="new-password"
+                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-12 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
+                    placeholder="••••••••"
+                    type={showPass ? "text" : "password"}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      {showPass ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div className="group">
+                <div className="flex justify-between items-end mb-2 ml-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                    Confirm Password
+                  </label>
+                </div>
+                <div className="relative flex items-center">
+                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
+                    lock
+                  </span>
+                  <input
+                    name="confirmPassword"
+                    autoComplete="new-password"
+                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-12 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
+                    placeholder="••••••••"
+                    type={showConfirmPass ? "text" : "password"}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPass(!showConfirmPass)}
+                    className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      {showConfirmPass ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
+
+            {/* Actions */}
+            <AuthActions
+              registerText="Register"
+              onRegister={() => console.log("Register clicked")}
+              onGoogleLogin={() => console.log("Google login clicked")}
+            />
           </div>
         </main>
-        {/* // <!-- Footer Area --> */}
+
         <footer className="pb-10 px-6 text-center">
           <p className="text-sm text-on-surface-variant font-medium">
-            New to Lalatrack?
+            Already have an Account?
             <Link
               className="text-primary-fixed-dim font-bold hover:underline transition-all"
               href="/auth/login"

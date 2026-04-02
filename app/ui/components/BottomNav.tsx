@@ -16,7 +16,10 @@ export default function BottomNav() {
     <>
       <nav className="fixed bottom-1 left-1/2 -translate-x-1/2 w-full max-w-lg bg-surface-container-low glass-nav rounded-md p-3 flex justify-around items-center z-10">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            item.href === "/dashboard"
+              ? pathname.startsWith("/dashboard")
+              : pathname === item.href;
 
           return (
             <Link

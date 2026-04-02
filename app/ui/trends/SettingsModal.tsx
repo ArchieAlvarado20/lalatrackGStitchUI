@@ -19,22 +19,32 @@ export default function SettingsModal({ open, onClose }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-[90%] max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-5"
+        className="w-[90%] max-w-sm bg-surface-container-low rounded-2xl p-6 space-y-3"
       >
-        <h2 className="text-lg font-bold text-center">Settings</h2>
+        <h2 className="text-lg font-bold text-center mb-2">Settings</h2>
 
-        <button className="w-full text-center p-3 hover:bg-[#20201f] rounded-lg">
-          Profile
+        {/* Profile */}
+        <button className="w-full flex items-center gap-3 p-3 hover:bg-white/5 rounded-lg transition">
+          <span className="material-symbols-outlined text-primary">
+            account_circle
+          </span>
+          <span className="text-sm font-medium">Profile</span>
         </button>
 
+        {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full text-center p-3  hover:bg-red-500/10 rounded-lg"
+          className="w-full flex items-center gap-3 p-3 hover:bg-red-500/10 rounded-lg transition"
         >
-          Logout
+          <span className="material-symbols-outlined text-red-500">logout</span>
+          <span className="text-sm font-medium text-red-500">Logout</span>
         </button>
 
-        <button onClick={onClose} className="w-full text-sm text-gray-400">
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="w-full text-sm text-gray-400 pt-2 hover:text-white transition"
+        >
           Close
         </button>
       </div>

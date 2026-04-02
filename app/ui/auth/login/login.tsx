@@ -1,6 +1,8 @@
+"use client";
 import Link from "next/link";
 import HeadAuth from "../HeadAuth";
 import SecurityBadges from "../SecurityBadges";
+import AuthActions from "../AuthActions";
 
 export default function Login() {
   return (
@@ -66,28 +68,13 @@ export default function Login() {
               </div>
             </div>
             {/* // <!-- Action Cluster (Thumb Zone) --> */}
-            <div className="pt-4 space-y-4">
-              <button className="w-full bg-primary-container from-primary to-primary-container text-on-primary-container font-black py-5 rounded-xl text-lg neumorphic-button uppercase tracking-wider transition-all active:scale-95">
-                Log In
-              </button>
-
-              <div className="flex items-center gap-4 py-2">
-                <div className="h-px bg-surface-variant flex-grow"></div>
-                <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
-                  or
-                </span>
-                <div className="h-px bg-surface-variant flex-grow"></div>
-              </div>
-              <button className="w-full bg-surface-container-high text-on-surface font-bold py-4 rounded-xl text-sm border border-outline-variant/10 hover:bg-surface-bright transition-all active:scale-95 flex items-center justify-center gap-2">
-                <span
-                  className="material-symbols-outlined text-xl text-primary"
-                  data-icon="dialpad"
-                >
-                  dialpad
-                </span>
-                LOGIN WITH OTP
-              </button>
-            </div>
+            <Link href="/dashboard" className="w-full">
+              <AuthActions
+                registerText="Login"
+                onRegister={() => console.log("Login clicked")}
+                onGoogleLogin={() => console.log("Google login clicked")}
+              />
+            </Link>
           </div>
         </main>
         {/* // <!-- Footer Area --> */}
