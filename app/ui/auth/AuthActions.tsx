@@ -4,11 +4,12 @@ export default function AuthActions({
   onRegister,
   onGoogleRegister,
   registerText,
+  type = "submit",
 }) {
   return (
     <div className="pt-4 space-y-4">
       <button
-        type="button"
+        type={type}
         onClick={onRegister}
         className="w-full bg-primary-container from-primary to-primary-container text-on-primary-container font-black py-5 rounded-xl text-lg neumorphic-button uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
       >
@@ -24,7 +25,7 @@ export default function AuthActions({
       </div>
 
       <button
-        type="button"
+        type={type}
         onClick={onGoogleRegister}
         className="w-full bg-surface-container-high text-on-surface font-bold py-4 rounded-xl text-sm border border-outline-variant/10 hover:bg-surface-bright transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
       >

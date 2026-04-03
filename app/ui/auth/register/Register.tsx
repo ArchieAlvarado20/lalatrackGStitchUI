@@ -6,33 +6,26 @@ import { useRouter } from "next/navigation";
 
 import HeadAuth from "../HeadAuth";
 import SecurityBadges from "../SecurityBadges";
-import AuthActions from "../AuthActions";
 
 // TODO: palitan mo ito base sa auth mo (Better Auth / Supabase / API)
-import { signUp } from "@/lib/auth-client";
+import { authClient, signUp } from "@/lib/auth-client";
+import { Input } from "../AuthInputs";
 
 export default function Register() {
   const router = useRouter();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [showPass, setShowPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleRegister = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError("");
 
-    // validation
     if (!name || !email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError("All fields are required");
       return;
     }
 
@@ -41,39 +34,36 @@ export default function Register() {
       return;
     }
 
-    try {
-      setLoading(true);
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
 
+    setLoading(true);
+
+    try {
       const result = await signUp.email({
-        name,
         email,
+        name,
         password,
       });
-
-      if (result?.error) {
-        setError(result.error.message || "Registration failed");
-        return;
+      if (result.error) {
+        setError(result.error.message || "Signup failed");
+      } else {
+        router.push("/dashboard");
       }
-
-      router.push("/dashboard");
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError("An error occurred during signup");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
-  const handleGoogleRegister = async () => {
-    try {
-      setLoading(true);
-
-      // TODO: replace with real provider login
-      // await signIn.social({ provider: "google" });
-    } catch (err) {
-      setError("Google login failed");
-    } finally {
-      setLoading(false);
-    }
+  const handleLoginWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
   };
 
   return (
@@ -81,90 +71,71 @@ export default function Register() {
       <HeadAuth />
 
       <div className="flex flex-col items-center justify-center bg-surface">
-        <main className="flex-grow flex flex-col justify-end px-6 pb-6 max-w-md mx-auto w-full">
-          <form onSubmit={handleRegister} className="space-y-6">
+        <main className="grow flex flex-col justify-end px-6 pb-6 max-w-md mx-auto w-full">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* NAME */}
-            <div>
-              <label className="text-xs font-bold uppercase">Name</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full p-4 rounded-xl bg-surface-container-lowest"
-                placeholder="Enter your name"
-                type="text"
-              />
-            </div>
+            <Input
+              id="name"
+              type="text"
+              name="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              data-icon="person"
+              placeholder="Enter Name"
+            />
 
             {/* EMAIL */}
-            <div>
-              <label className="text-xs font-bold uppercase">Email</label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-4 rounded-xl bg-surface-container-lowest"
-                placeholder="Enter email"
-                type="email"
-              />
-            </div>
+            <Input
+              id="email"
+              type="email"
+              name="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              data-icon="message"
+              placeholder="Enter Email"
+            />
 
             {/* PASSWORD */}
-            <div>
-              <label className="text-xs font-bold uppercase">Password</label>
-
-              <div className="relative">
-                <input
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  type={showPass ? "text" : "password"}
-                  className="w-full p-4 rounded-xl bg-surface-container-lowest"
-                  placeholder="Password"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-4 top-4"
-                >
-                  {showPass ? "Hide" : "Show"}
-                </button>
-              </div>
-            </div>
+            <Input
+              id="password"
+              type="password"
+              name="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              data-icon="lock"
+              placeholder="Enter Password"
+            />
 
             {/* CONFIRM PASSWORD */}
-            <div>
-              <label className="text-xs font-bold uppercase">
-                Confirm Password
-              </label>
-
-              <div className="relative">
-                <input
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  type={showConfirmPass ? "text" : "password"}
-                  className="w-full p-4 rounded-xl bg-surface-container-lowest"
-                  placeholder="Confirm password"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPass(!showConfirmPass)}
-                  className="absolute right-4 top-4"
-                >
-                  {showConfirmPass ? "Hide" : "Show"}
-                </button>
-              </div>
-            </div>
+            <Input
+              id="confirmPassword"
+              type="password"
+              name="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              data-icon="lock"
+              placeholder="Confirm Password"
+            />
 
             {/* ERROR */}
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {/* ACTIONS */}
-            <AuthActions
-              registerText={loading ? "Creating account..." : "Register"}
-              onRegister={handleRegister}
-              onGoogleRegister={handleGoogleRegister}
-            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-primary-container from-primary to-primary-container text-on-primary-container font-black py-5 rounded-xl text-lg neumorphic-button uppercase tracking-wider transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              {loading ? "Registering..." : "Register"}
+            </button>
           </form>
+          <button
+            type="submit"
+            onClick={handleLoginWithGoogle}
+            className="w-full mt-1 bg-primary-container from-primary to-primary-container text-on-primary-container font-black py-5 rounded-xl text-lg neumorphic-button uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
+          >
+            Register with Google
+          </button>
         </main>
 
         <footer className="pb-10 px-6 text-center">
