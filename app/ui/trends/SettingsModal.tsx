@@ -8,7 +8,6 @@ export default function SettingsModal({ open, onClose }) {
   if (!open) return null;
 
   const handleLogout = () => {
-    // optional: clear auth here
     router.push("/auth/login");
   };
 
@@ -24,8 +23,8 @@ export default function SettingsModal({ open, onClose }) {
         <h2 className="text-lg font-bold text-center mb-2">Settings</h2>
 
         {/* Profile */}
-        <button className="w-full flex items-center gap-3 p-3 hover:bg-white/5 rounded-lg transition">
-          <span className="material-symbols-outlined text-primary">
+        <button className="w-full flex flex-col items-center justify-center gap-1 p-4 hover:bg-white/5 rounded-lg transition cursor-pointer">
+          <span className="material-symbols-outlined text-primary text-2xl">
             account_circle
           </span>
           <span className="text-sm font-medium">Profile</span>
@@ -34,16 +33,18 @@ export default function SettingsModal({ open, onClose }) {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 p-3 hover:bg-red-500/10 rounded-lg transition"
+          className="w-full flex flex-col items-center justify-center gap-1 p-4 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
         >
-          <span className="material-symbols-outlined text-red-500">logout</span>
+          <span className="material-symbols-outlined text-red-500 text-2xl">
+            logout
+          </span>
           <span className="text-sm font-medium text-red-500">Logout</span>
         </button>
 
         {/* Close */}
         <button
           onClick={onClose}
-          className="w-full text-sm text-gray-400 pt-2 hover:text-white transition"
+          className="w-full text-sm text-gray-400 pt-2 hover:text-white transition text-center"
         >
           Close
         </button>

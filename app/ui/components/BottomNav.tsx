@@ -14,7 +14,7 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="fixed bottom-1 left-1/2 -translate-x-1/2 w-full max-w-lg bg-surface-container-low glass-nav rounded-md p-3 flex justify-around items-center z-10">
+      <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-lg bg-surface-container-low glass-nav rounded-md p-3 flex justify-around items-center z-10">
         {navItems.map((item) => {
           const isActive =
             item.href === "/dashboard"
@@ -42,7 +42,7 @@ export default function BottomNav() {
         })}
       </nav>
 
-      <div className="fixed inset-x-0 bottom-0 h-20 pointer-events-none bg-gradient-to-t from-[#0e0e0e] to-transparent"></div>
+      <div className="fixed inset-x-0 bottom-0 h-32 pointer-events-none bg-gradient-to-t from-[#0e0e0e] to-transparent"></div>
     </>
   );
 }

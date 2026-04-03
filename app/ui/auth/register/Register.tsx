@@ -2,139 +2,179 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import HeadAuth from "../HeadAuth";
 import SecurityBadges from "../SecurityBadges";
 import AuthActions from "../AuthActions";
 
+// TODO: palitan mo ito base sa auth mo (Better Auth / Supabase / API)
+import { signUp } from "@/lib/auth-client";
+
 export default function Register() {
+  const router = useRouter();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    setError("");
+
+    // validation
+    if (!name || !email || !password || !confirmPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const result = await signUp.email({
+        name,
+        email,
+        password,
+      });
+
+      if (result?.error) {
+        setError(result.error.message || "Registration failed");
+        return;
+      }
+
+      router.push("/dashboard");
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      setLoading(true);
+
+      // TODO: replace with real provider login
+      // await signIn.social({ provider: "google" });
+    } catch (err) {
+      setError("Google login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <HeadAuth />
-      <div className="min-h-screen flex-colitems-center justify-center bg-surface">
+
+      <div className="flex flex-col items-center justify-center bg-surface">
         <main className="flex-grow flex flex-col justify-end px-6 pb-6 max-w-md mx-auto w-full">
-          <div className="space-y-6">
-            <div className="space-y-4">
-              {/* Email */}
-              <div className="group">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">
-                  Name
-                </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
-                    person
-                  </span>
-                  <input
-                    name="name"
-                    autoComplete="name"
-                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-4 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="Enter your Name"
-                    type="email"
-                  />
-                </div>
-              </div>
+          <form onSubmit={handleRegister} className="space-y-6">
+            {/* NAME */}
+            <div>
+              <label className="text-xs font-bold uppercase">Name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-4 rounded-xl bg-surface-container-lowest"
+                placeholder="Enter your name"
+                type="text"
+              />
+            </div>
 
-              {/* Confirm Email */}
-              <div className="group">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1">
-                  Email
-                </label>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
-                    mail
-                  </span>
-                  <input
-                    name="confirmEmail"
-                    autoComplete="email"
-                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-4 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="Enter Email"
-                    type="email"
-                  />
-                </div>
-              </div>
+            {/* EMAIL */}
+            <div>
+              <label className="text-xs font-bold uppercase">Email</label>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-4 rounded-xl bg-surface-container-lowest"
+                placeholder="Enter email"
+                type="email"
+              />
+            </div>
 
-              {/* Password */}
-              <div className="group">
-                <div className="flex justify-between items-end mb-2 ml-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    Password
-                  </label>
-                </div>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
-                    lock
-                  </span>
-                  <input
-                    name="password"
-                    autoComplete="new-password"
-                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-12 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="••••••••"
-                    type={showPass ? "text" : "password"}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(!showPass)}
-                    className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-xl">
-                      {showPass ? "visibility_off" : "visibility"}
-                    </span>
-                  </button>
-                </div>
-              </div>
+            {/* PASSWORD */}
+            <div>
+              <label className="text-xs font-bold uppercase">Password</label>
 
-              {/* Confirm Password */}
-              <div className="group">
-                <div className="flex justify-between items-end mb-2 ml-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                    Confirm Password
-                  </label>
-                </div>
-                <div className="relative flex items-center">
-                  <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/50 text-xl">
-                    lock
-                  </span>
-                  <input
-                    name="confirmPassword"
-                    autoComplete="new-password"
-                    className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-12 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
-                    placeholder="••••••••"
-                    type={showConfirmPass ? "text" : "password"}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPass(!showConfirmPass)}
-                    className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-xl">
-                      {showConfirmPass ? "visibility_off" : "visibility"}
-                    </span>
-                  </button>
-                </div>
+              <div className="relative">
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type={showPass ? "text" : "password"}
+                  className="w-full p-4 rounded-xl bg-surface-container-lowest"
+                  placeholder="Password"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-4 top-4"
+                >
+                  {showPass ? "Hide" : "Show"}
+                </button>
               </div>
             </div>
 
-            {/* Actions */}
+            {/* CONFIRM PASSWORD */}
+            <div>
+              <label className="text-xs font-bold uppercase">
+                Confirm Password
+              </label>
+
+              <div className="relative">
+                <input
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  type={showConfirmPass ? "text" : "password"}
+                  className="w-full p-4 rounded-xl bg-surface-container-lowest"
+                  placeholder="Confirm password"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPass(!showConfirmPass)}
+                  className="absolute right-4 top-4"
+                >
+                  {showConfirmPass ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+
+            {/* ERROR */}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            {/* ACTIONS */}
             <AuthActions
-              registerText="Register"
-              onRegister={() => console.log("Register clicked")}
-              onGoogleLogin={() => console.log("Google login clicked")}
+              registerText={loading ? "Creating account..." : "Register"}
+              onRegister={handleRegister}
+              onGoogleRegister={handleGoogleRegister}
             />
-          </div>
+          </form>
         </main>
 
         <footer className="pb-10 px-6 text-center">
-          <p className="text-sm text-on-surface-variant font-medium">
-            Already have an Account?
-            <Link
-              className="text-primary-fixed-dim font-bold hover:underline transition-all"
-              href="/auth/login"
-            >
+          <p className="text-sm">
+            Already have an account?{" "}
+            <Link href="/auth/login" className="font-bold">
               Login
             </Link>
           </p>
+
           <SecurityBadges />
         </footer>
       </div>

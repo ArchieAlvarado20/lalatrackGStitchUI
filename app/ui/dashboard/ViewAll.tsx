@@ -7,7 +7,7 @@ export default function ViewAll() {
   return (
     <>
       <Head />
-      <main className="flex-1 px-5 pb-32">
+      <main className="flex-1 px-2 pt-6 max-w-2xl mx-auto space-y-8 mb-12">
         {/* <!-- Segmented Filter Control (Kinetic Cockpit Style) --> */}
         <section className="mt-4 mb-8">
           <div className="flex p-1.5 bg-surface-container-lowest rounded-2xl w-full max-w-sm mx-auto neumorphic-inset">

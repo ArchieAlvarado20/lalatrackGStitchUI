@@ -2,7 +2,7 @@ import { FcGoogle } from "react-icons/fc";
 
 export default function AuthActions({
   onRegister,
-  onGoogleLogin,
+  onGoogleRegister,
   registerText,
 }) {
   return (
@@ -10,7 +10,7 @@ export default function AuthActions({
       <button
         type="button"
         onClick={onRegister}
-        className="w-full bg-primary-container from-primary to-primary-container text-on-primary-container font-black py-5 rounded-xl text-lg neumorphic-button uppercase tracking-wider transition-all active:scale-95"
+        className="w-full bg-primary-container from-primary to-primary-container text-on-primary-container font-black py-5 rounded-xl text-lg neumorphic-button uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
       >
         {registerText}
       </button>
@@ -25,8 +25,8 @@ export default function AuthActions({
 
       <button
         type="button"
-        onClick={onGoogleLogin}
-        className="w-full bg-surface-container-high text-on-surface font-bold py-4 rounded-xl text-sm border border-outline-variant/10 hover:bg-surface-bright transition-all active:scale-95 flex items-center justify-center gap-2"
+        onClick={onGoogleRegister}
+        className="w-full bg-surface-container-high text-on-surface font-bold py-4 rounded-xl text-sm border border-outline-variant/10 hover:bg-surface-bright transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
       >
         <span className="material-symbols-outlined text-xl text-primary">
           <FcGoogle className="text-xl" />

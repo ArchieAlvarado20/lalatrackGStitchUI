@@ -3,8 +3,10 @@ import Link from "next/link";
 import HeadAuth from "../HeadAuth";
 import SecurityBadges from "../SecurityBadges";
 import AuthActions from "../AuthActions";
+import { useState } from "react";
 
 export default function Login() {
+  const [showPass, setShowPass] = useState(false);
   return (
     <>
       <HeadAuth />
@@ -52,16 +54,19 @@ export default function Login() {
                     lock
                   </span>
                   <input
+                    name="password"
+                    autoComplete="new-password"
                     className="w-full bg-surface-container-lowest neumorphic-inset rounded-xl py-4 pl-12 pr-12 border-none text-on-surface focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-on-surface-variant/30 focus:shadow-none focus:outline-none"
                     placeholder="••••••••"
-                    type="password"
+                    type={showPass ? "text" : "password"}
                   />
-                  <button className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors">
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      data-icon="visibility"
-                    >
-                      visibility
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    className="absolute right-4 text-on-surface-variant/50 hover:text-on-surface transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      {showPass ? "visibility_off" : "visibility"}
                     </span>
                   </button>
                 </div>
