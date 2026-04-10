@@ -1,22 +1,121 @@
 "use client";
-import { useState } from "react";
+
 import {
-  TrendingUp,
   Fuel,
+  Utensils,
+  Wallet,
   Wrench,
-  Package,
-  DollarSign,
+  Smartphone,
+  MoreHorizontal,
   ReceiptText,
+  LucideIcon,
+  DollarSign,
 } from "lucide-react";
 import TopAppBar from "@/components/topAppBar";
 import BottomNavBar from "@/components/bottomNavBar";
 import LogItem from "@/components/logItem";
 import { auth } from "@/lib/auth";
+import { useState, useEffect } from "react";
+import {
+  createRide,
+  getRides,
+  getRideTotal,
+  getTodayIncome,
+  getTodayRides,
+} from "@/lib/actions/logs-actions";
+
+import {
+  getExpenses,
+  getExpenseTotal,
+  getTodayExpense,
+} from "@/lib/actions/expense-actions";
 
 type Session = typeof auth.$Infer.Session;
 
+type Ride = {
+  id: number;
+  userId: string;
+  fare: number;
+  payment: number;
+  tip: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
+type Expense = {
+  id: number;
+  userId: string;
+  amount: number;
+  category: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
 export default function TransactionHistory({ session }: { session: Session }) {
   const [filter, setFilter] = useState("income"); // income, expenses
+  const [rides, setRides] = useState<Ride[]>([]);
+  const [totalIncome, setTotalIncome] = useState<number>(0);
+  const [expense, setExpense] = useState<Expense[]>([]);
+  const [expenseAmount, setExpenseAmount] = useState<number>(0);
+
+  const categoryIcons: Record<string, LucideIcon> = {
+    Gas: Fuel,
+    Food: Utensils,
+    Topup: Wallet,
+    Maintenance: Wrench,
+    Load: Smartphone,
+    Others: MoreHorizontal,
+  };
+
+  const loadTotalIncome = async () => {
+    const result = await getRideTotal(session.user.id);
+    setTotalIncome(result);
+  };
+
+  const loadLogs = async () => {
+    const data = await getRides(session.user.id);
+
+    const formatted: Ride[] = data.map((r) => ({
+      ...r,
+      fare: Number(r.fare),
+      payment: Number(r.payment),
+      tip: Number(r.tip),
+    }));
+
+    setRides(formatted);
+  };
+
+  const loadExpenseAmount = async () => {
+    const result = await getExpenseTotal(session.user.id);
+    setExpenseAmount(result);
+  };
+
+  const loadExpense = async () => {
+    const data = await getExpenses(session.user.id);
+
+    const formatted: Expense[] = data.map((r) => ({
+      ...r,
+      category: String(r.category),
+      amount: Number(r.amount),
+    }));
+
+    setExpense(formatted);
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      await Promise.all([
+        loadLogs(),
+        loadTotalIncome(),
+        loadExpense(),
+        loadExpenseAmount(),
+      ]);
+    };
+
+    init();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white font-['Inter'] selection:bg-[#f26722] pb-32">
@@ -46,7 +145,7 @@ export default function TransactionHistory({ session }: { session: Session }) {
               Total {filter === "income" ? "Income" : "Expenses"}
             </p>
             <h2 className="text-5xl font-black text-[#f26722] tracking-tighter italic">
-              $142.50
+              ₱ {filter === "income" ? `${totalIncome}` : `${expenseAmount}`}
             </h2>
           </div>
           <div className="absolute right-[-20px] top-[-20px] opacity-5">
@@ -69,27 +168,37 @@ export default function TransactionHistory({ session }: { session: Session }) {
               <div className="h-px flex-1 bg-white/5"></div>
             </div>
             <div className="space-y-3">
-              <LogItem
-                icon={Package}
-                title="Delivery"
-                subtitle="Shell Station • 2:14 PM"
-                amount="$18.50"
-                isNegative
-              />
-              <LogItem
-                icon={Fuel}
-                title="Maintenance"
-                subtitle="Shell Station • 2:14 PM"
-                amount="$18.50"
-                isNegative
-              />
-              <LogItem
-                icon={Package}
-                title="Delivery"
-                subtitle="Shell Station • 2:14 PM"
-                amount="$18.50"
-                isNegative
-              />
+              {filter === "income"
+                ? rides.map((ride) => (
+                    <LogItem
+                      key={ride.id}
+                      icon={() => (
+                        <div className="font-black italic text-sm">D</div>
+                      )}
+                      title="Successful Delivery"
+                      subtitle={new Date(ride.createdAt!).toLocaleString()}
+                      amount={`₱${Number(ride.payment).toFixed(2)}`}
+                    />
+                  ))
+                : expense.map((expenses) => {
+                    const Icon =
+                      categoryIcons[expenses.category] || MoreHorizontal;
+
+                    return (
+                      <LogItem
+                        key={expenses.id}
+                        icon={Icon}
+                        title={expenses.category}
+                        subtitle={
+                          expenses.createdAt
+                            ? new Date(expenses.createdAt).toLocaleString()
+                            : "No date"
+                        }
+                        amount={`-₱${expenses.amount.toFixed(2)}`}
+                        isNegative
+                      />
+                    );
+                  })}
             </div>
           </section>
 
@@ -101,22 +210,7 @@ export default function TransactionHistory({ session }: { session: Session }) {
               </span>
               <div className="h-px flex-1 bg-white/5"></div>
             </div>
-            <div className="space-y-3">
-              <LogItem
-                icon={TrendingUp}
-                title="Maintenance"
-                subtitle="Shell Station • 2:14 PM"
-                amount="$18.50"
-                isNegative
-              />
-              <LogItem
-                icon={Wrench}
-                title="Maintenance"
-                subtitle="Shell Station • 2:14 PM"
-                amount="$18.50"
-                isNegative
-              />
-            </div>
+            <div className="space-y-3"></div>
           </section>
         </div>
       </main>

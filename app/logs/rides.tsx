@@ -1,27 +1,103 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DollarSign, ArrowRight, Fuel, GiftIcon } from "lucide-react";
 import TopAppBar from "@/components/topAppBar";
 import BottomNavBar from "@/components/bottomNavBar";
 import { ActionButton } from "@/components/actionButton";
 import LogItem from "@/components/logItem";
 import { auth } from "@/lib/auth";
+import {
+  createRide,
+  getTodayIncome,
+  getTodayRides,
+} from "@/lib/actions/logs-actions";
+import toast from "react-hot-toast";
 
 type Session = typeof auth.$Infer.Session;
+
+type Ride = {
+  id: number;
+  userId: string;
+  fare: number;
+  payment: number;
+  tip: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
 
 export default function IncomeLogPage({ session }: { session: Session }) {
   const [fare, setFare] = useState("");
   const [payment, setPayment] = useState("");
+  const [income, setIncome] = useState<number>(0);
+  const [rides, setRides] = useState<Ride[]>([]);
 
-  // Tip Calculation Logic: Payment Received - Fare Amount = Tip
   const tip = (parseFloat(payment) || 0) - (parseFloat(fare) || 0);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Logging income:", { fare, payment, tip });
-    // Add backend integration here
+  const load = async () => {
+    const result = await getTodayIncome(session.user.id);
+    setIncome(result);
   };
 
+  const loadLogs = async () => {
+    const data = await getTodayRides(session.user.id);
+
+    const formatted: Ride[] = data.map((r) => ({
+      ...r,
+      fare: Number(r.fare),
+      payment: Number(r.payment),
+      tip: Number(r.tip),
+    }));
+
+    setRides(formatted);
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      await Promise.all([load(), loadLogs()]);
+    };
+
+    init();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!fare || !payment) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (Number(fare) <= 0 || Number(payment) <= 0) {
+      toast.error("Values must be greater than 0");
+      return;
+    }
+
+    if (Number(payment) < Number(fare)) {
+      toast.error("Payment cannot be less than fare");
+      return;
+    }
+
+    try {
+      await createRide({
+        fare: Number(fare),
+        payment: Number(payment),
+        tip: Number(tip),
+        userId: session.user.id,
+      });
+
+      setFare("");
+      setPayment("");
+
+      toast.success("Ride created successfully!");
+
+      // 🔥 refresh data after submit
+      await Promise.all([load(), loadLogs()]);
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    }
+  };
   return (
     <>
       <TopAppBar session={session} />
@@ -31,10 +107,10 @@ export default function IncomeLogPage({ session }: { session: Session }) {
         <div className="bg-[#131313] p-8 rounded-[2rem] border border-white/5 mb-8 relative overflow-hidden">
           <div className="relative z-10">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa] mb-2">
-              Current Session
+              Total Payment Recieved
             </p>
             <h2 className="text-5xl font-black text-[#f26722] tracking-tighter italic">
-              $142.50
+              ₱{income}
             </h2>
           </div>
           <div className="absolute right-[-20px] top-[-20px] opacity-5">
@@ -79,11 +155,12 @@ export default function IncomeLogPage({ session }: { session: Session }) {
               </div>
               <div className="relative group">
                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#f26722] font-black text-2xl">
-                  $
+                  ₱
                 </div>
                 <input
                   type="number"
                   value={fare}
+                  name="fare"
                   onChange={(e) => setFare(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-white/5 rounded-2xl p-3 pl-12 text-3xl font-black text-white outline-none focus:border-[#f26722]/40 transition-all placeholder:text-neutral-800"
                   placeholder="0.00"
@@ -98,10 +175,11 @@ export default function IncomeLogPage({ session }: { session: Session }) {
               </label>
               <div className="relative group">
                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#f26722] font-black text-2xl">
-                  $
+                  ₱
                 </div>
                 <input
                   type="number"
+                  name="payment"
                   value={payment}
                   onChange={(e) => setPayment(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-white/5 rounded-2xl p-3 pl-12 text-3xl font-black text-white outline-none focus:border-[#f26722]/40 transition-all placeholder:text-neutral-800"
@@ -120,7 +198,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
                   <p className="text-[8px] font-black uppercase text-[#adaaaa] tracking-widest">
                     Calculated Tip
                   </p>
-                  <p className="text-xs font-bold text-white group-hover:text-[#f26722] transition-colors">
+                  <p className="text-xs font-bold text-[#f26722] transition-colors">
                     Auto-calculated
                   </p>
                 </div>
@@ -128,7 +206,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
               <div
                 className={`text-2xl font-black italic tracking-tighter ${tip > 0 ? "text-[#f26722]" : "text-neutral-700"}`}
               >
-                +${tip.toFixed(2)}
+                +₱{tip.toFixed(2)}
               </div>
             </div>
           </div>
@@ -146,19 +224,15 @@ export default function IncomeLogPage({ session }: { session: Session }) {
           />
         </form>
         <div className="space-y-3 mt-5  ">
-          <LogItem
-            icon={Fuel}
-            title="Fuel Refill"
-            subtitle="Shell Station • 2:14 PM"
-            amount="$18.50"
-            isNegative
-          />
-          <LogItem
-            icon={() => <div className="font-black italic text-sm">D</div>}
-            title="Large Delivery Tip"
-            subtitle="Order #8821 • 1:45 PM"
-            amount="$12.00"
-          />
+          {rides.map((ride) => (
+            <LogItem
+              key={ride.id}
+              icon={() => <div className="font-black italic text-sm">D</div>}
+              title="Successful Delivery"
+              subtitle={new Date(ride.createdAt!).toLocaleString()}
+              amount={`₱${Number(ride.payment).toFixed(2)}`}
+            />
+          ))}
         </div>
       </main>
 

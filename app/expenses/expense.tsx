@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition, useEffect } from "react";
 import {
   Fuel,
   Utensils,
@@ -10,21 +10,39 @@ import {
   ReceiptText,
   Camera,
   ArrowRight,
+  LucideIcon,
 } from "lucide-react";
 import BottomNavBar from "@/components/bottomNavBar";
 import TopAppBar from "@/components/topAppBar";
 import LogItem from "@/components/logItem";
 import { ActionButton } from "@/components/actionButton";
 import { auth } from "@/lib/auth";
+import {
+  createExpense,
+  getTodayExpense,
+  getTodayExpenseAmount,
+} from "@/lib/actions/expense-actions";
+import toast from "react-hot-toast";
 
 type Session = typeof auth.$Infer.Session;
+
+type Expense = {
+  id: number;
+  userId: string;
+  amount: number;
+  category: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
 
 export default function ExpenseLogPage({ session }: { session: Session }) {
   const [amount, setAmount] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Gas");
   const [otherCategory, setOtherCategory] = useState("");
-  const [note, setNote] = useState("");
-  const [payment, setPayment] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const [expenseAmount, setExpenseAmount] = useState<number>(0);
+  const [expense, setExpense] = useState<Expense[]>([]);
 
   const categories = [
     { id: "Gas", icon: Fuel },
@@ -35,11 +53,75 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
     { id: "Others", icon: MoreHorizontal },
   ];
 
+  const categoryIcons: Record<string, LucideIcon> = {
+    Gas: Fuel,
+    Food: Utensils,
+    Topup: Wallet,
+    Maintenance: Wrench,
+    Load: Smartphone,
+    Others: MoreHorizontal,
+  };
+
+  const loadExpenseAmount = async () => {
+    const result = await getTodayExpenseAmount(session.user.id);
+    setExpenseAmount(result);
+  };
+
+  const loadExpense = async () => {
+    const data = await getTodayExpense(session.user.id);
+
+    const formatted: Expense[] = data.map((r) => ({
+      ...r,
+      category: String(r.category),
+      amount: Number(r.amount),
+    }));
+
+    setExpense(formatted);
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      await Promise.all([loadExpenseAmount(), loadExpense()]);
+    };
+
+    init();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const finalCategory =
       selectedCategory === "Others" ? otherCategory : selectedCategory;
-    console.log("Logging expense:", { amount, category: finalCategory, note });
+
+    if (!amount) {
+      toast.error("Please fill out the amount");
+      return;
+    }
+
+    if (Number(amount) <= 0) {
+      toast.error("Values must be greater than 0");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        await createExpense({
+          amount: Number(amount),
+          category: finalCategory,
+          userId: session.user.id,
+        });
+
+        setAmount("");
+        setOtherCategory("");
+        setSelectedCategory("Gas");
+        loadExpenseAmount();
+        loadExpense();
+        toast.success("Expense added successfully!");
+      } catch (err) {
+        console.error(err);
+        toast.error("Something went wrong");
+      }
+    });
   };
 
   return (
@@ -52,10 +134,10 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
           <div className="bg-[#131313] p-8 rounded-[2rem] border border-white/5 mb-8 relative overflow-hidden">
             <div className="relative z-10">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa] mb-2">
-                Current Expenses
+                Total Expenses
               </p>
               <h2 className="text-5xl font-black text-[#f26722] tracking-tighter italic">
-                $250.50
+                ₱{expenseAmount}
               </h2>
             </div>
             <div className="absolute right-[-20px] top-[-20px] opacity-5 rotate-12">
@@ -94,6 +176,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
               <div className="grid grid-cols-3 gap-3">
                 {categories.map((cat) => (
                   <button
+                    name="category"
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id)}
@@ -121,9 +204,10 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
                   $
                 </div>
                 <input
+                  name="amount"
                   type="number"
-                  value={payment}
-                  onChange={(e) => setPayment(e.target.value)}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-white/5 rounded-2xl p-3 pl-12 text-3xl font-black text-white outline-none focus:border-[#f26722]/40 transition-all placeholder:text-neutral-800"
                   placeholder="0.00"
                 />
@@ -138,7 +222,12 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
                 <input
                   type="text"
                   value={otherCategory}
-                  onChange={(e) => setOtherCategory(e.target.value)}
+                  onChange={(e) =>
+                    setOtherCategory(
+                      e.target.value.charAt(0).toUpperCase() +
+                        e.target.value.slice(1),
+                    )
+                  }
                   className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl p-5 text-white outline-none focus:border-[#f26722]/50 transition-colors placeholder:text-neutral-700 font-bold"
                   placeholder="e.g. Parking, Toll"
                   required={selectedCategory === "Others"}
@@ -146,23 +235,12 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
               </div>
             )}
           </div>
-          {/* 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] ml-4">
-              Notes (Optional)
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="w-full bg-[#131313] border border-white/5 rounded-2xl p-5 text-white outline-none focus:border-[#f26722]/50 transition-colors placeholder:text-neutral-700 min-h-[100px] font-medium"
-              placeholder="Add details about this expense..."
-            />
-          </div> */}
 
           {/* Log Button */}
           <ActionButton
             type="submit"
             label="Log Expense"
+            disabled={isPending}
             leftIcon={
               <ReceiptText
                 size={28}
@@ -176,13 +254,24 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
           />
         </form>
         <div className="space-y-3 mt-5  ">
-          <LogItem
-            icon={Fuel}
-            title="Fuel Refill"
-            subtitle="Shell Station • 2:14 PM"
-            amount="$18.50"
-            isNegative
-          />
+          {expense.map((expenses) => {
+            const Icon = categoryIcons[expenses.category] || MoreHorizontal;
+
+            return (
+              <LogItem
+                key={expenses.id}
+                icon={Icon}
+                title={expenses.category}
+                subtitle={
+                  expenses.createdAt
+                    ? new Date(expenses.createdAt).toLocaleString()
+                    : "No date"
+                }
+                amount={`-₱${expenses.amount.toFixed(2)}`}
+                isNegative
+              />
+            );
+          })}
         </div>
       </main>
 
