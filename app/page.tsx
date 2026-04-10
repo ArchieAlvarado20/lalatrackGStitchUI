@@ -30,7 +30,7 @@ export default function Home() {
             </a>
           </div>
           <Link
-            href="/auth/login"
+            href="/auth"
             className="bg-primary-container text-on-primary-container font-bold px-6 py-2 rounded-lg hover:scale-95 transition-all duration-200 active:scale-95 shadow-lg inline-block text-center"
           >
             Login
@@ -107,7 +107,7 @@ export default function Home() {
                 {/* <!-- Mini Dashboard --> */}
                 <div className="bg-surface-container-low rounded-2xl p-4 mb-4 neumorphic-flat">
                   <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold mb-1">
-                    Today's Earnings
+                    Today{"'"}s Earnings
                   </p>
                   <h3 className="text-2xl font-black text-on-surface">
                     ₱2,450.50

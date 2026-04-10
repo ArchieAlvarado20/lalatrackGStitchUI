@@ -1,15 +1,15 @@
-import DashboardPage from "./dashboardPage";
+import { auth } from "@/lib/auth";
+import AuthClientPage from "./auth-client";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 
 export default async function page() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  if (!session) {
-    redirect("/auth");
+  if (session) {
+    redirect("/dashboard");
   }
-  return <DashboardPage session={session} />;
+  return <AuthClientPage />;
 }

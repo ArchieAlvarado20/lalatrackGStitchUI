@@ -1,14 +1,21 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { signOut } from "@/lib/actions/auth-actions";
 
-export default function SettingsModal({ open, onClose }) {
+type SettingsProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+export default function SettingsModal({ open, onClose }: SettingsProps) {
   const router = useRouter();
 
   if (!open) return null;
 
-  const handleLogout = () => {
-    router.push("/auth/login");
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/auth");
   };
 
   return (
@@ -32,7 +39,7 @@ export default function SettingsModal({ open, onClose }) {
 
         {/* Logout */}
         <button
-          onClick={handleLogout}
+          onClick={handleSignOut}
           className="w-full flex flex-col items-center justify-center gap-1 p-4 hover:bg-red-500/10 rounded-lg transition cursor-pointer"
         >
           <span className="material-symbols-outlined text-red-500 text-2xl">
