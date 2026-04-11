@@ -6,6 +6,7 @@ import { InputField } from "@/components/authInput";
 import { FcGoogle } from "react-icons/fc";
 import { signIn, signInSocial, signUp } from "@/lib/actions/auth-actions";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 
 export default function AuthClientPage() {
   const router = useRouter();
@@ -70,6 +71,10 @@ export default function AuthClientPage() {
           setError("Failed to create account");
           return;
         }
+
+        track("signup", {
+          method: "email",
+        });
 
         router.push("/dashboard");
       }
