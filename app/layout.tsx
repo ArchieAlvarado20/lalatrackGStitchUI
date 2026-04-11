@@ -35,7 +35,7 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
       </head>
-      <body className="min-h-screen bg-[#0e0e0e] text-white font-['Inter'] selection:bg-[#f26722] pb-32">
+      <body className="min-h-screen bg-[#0e0e0e] text-white font-['Inter'] selection:bg-[#f26722]">
         {children} <Toaster /> <Analytics />
       </body>
     </html>
