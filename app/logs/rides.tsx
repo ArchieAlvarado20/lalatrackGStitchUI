@@ -12,6 +12,7 @@ import {
   getTodayRides,
 } from "@/lib/actions/logs-actions";
 import toast from "react-hot-toast";
+import DateTime from "@/components/dateTime";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -119,26 +120,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
         </div>
 
         {/* Date/Time Row */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-[#131313] p-5 rounded-2xl border border-white/5">
-            <p className="text-[8px] font-black uppercase text-[#adaaaa] tracking-widest mb-2">
-              Date
-            </p>
-            <div className="flex items-center gap-2 text-sm font-bold">
-              <span className="text-[#f26722] opacity-60">📅</span>
-              Oct 24, 2023
-            </div>
-          </div>
-          <div className="bg-[#131313] p-5 rounded-2xl border border-white/5">
-            <p className="text-[8px] font-black uppercase text-[#adaaaa] tracking-widest mb-2">
-              Time
-            </p>
-            <div className="flex items-center gap-2 text-sm font-bold">
-              <span className="text-[#f26722] opacity-60">🕒</span>
-              14:30 PM
-            </div>
-          </div>
-        </div>
+        <DateTime />
 
         {/* Input Form Section */}
         <form onSubmit={handleSubmit} className="space-y-8">

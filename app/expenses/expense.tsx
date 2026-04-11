@@ -23,6 +23,7 @@ import {
   getTodayExpenseAmount,
 } from "@/lib/actions/expense-actions";
 import toast from "react-hot-toast";
+import DateTime from "@/components/dateTime";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -146,26 +147,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
           </div>
 
           {/* Date & Note Section */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#131313] p-5 rounded-2xl border border-white/5">
-              <p className="text-[8px] font-black uppercase text-[#adaaaa] tracking-widest mb-2">
-                Date
-              </p>
-              <div className="flex items-center gap-2 text-sm font-bold">
-                <span className="text-[#f26722] opacity-60">📅</span>
-                Oct 27, 2023
-              </div>
-            </div>
-            <div className="bg-[#131313] p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center group">
-              <Camera
-                size={20}
-                className="text-[#f26722] mb-1 group-hover:scale-110 transition-transform"
-              />
-              <p className="text-[8px] font-black uppercase tracking-widest text-[#adaaaa]">
-                Attach Receipt
-              </p>
-            </div>
-          </div>
+          <DateTime />
 
           <div className="bg-[#131313] p-6 rounded-[2rem] border border-white/5 space-y-8">
             {/* Category Section */}
