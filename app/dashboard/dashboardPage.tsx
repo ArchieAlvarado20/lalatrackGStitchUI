@@ -30,10 +30,16 @@ type Ride = {
 export default function DashboardPage({ session }: { session: Session }) {
   const [rides, setRides] = useState<Ride[]>([]);
   const [tip, setTip] = useState<number>(0);
+  const [income, setIncome] = useState<number>(0);
 
   const loadTip = async () => {
     const result = await getTodayTip(session.user.id);
     setTip(result);
+  };
+
+  const load = async () => {
+    const result = await getTodayIncome(session.user.id);
+    setIncome(result);
   };
 
   const loadLogs = async () => {
@@ -50,7 +56,7 @@ export default function DashboardPage({ session }: { session: Session }) {
   };
   useEffect(() => {
     const init = async () => {
-      await Promise.all([loadLogs(), loadTip()]);
+      await Promise.all([loadLogs(), loadTip(), load()]);
     };
 
     init();
@@ -70,11 +76,11 @@ export default function DashboardPage({ session }: { session: Session }) {
             </span>
           </div>
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#adaaaa] mb-2 font-black">
-            Real-time Net Profit
+            Real-time Cash + Online Income
           </p>
           <div className="flex items-end justify-center gap-2 mb-2">
             <h2 className="text-7xl font-black text-[#f26722] tracking-tighter italic">
-              ₱{tip}
+              ₱{income}
             </h2>
             <span className="text-xl font-black text-white/40 mb-3 tracking-tighter">
               PHP

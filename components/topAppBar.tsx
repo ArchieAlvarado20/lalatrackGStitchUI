@@ -35,7 +35,7 @@ const TopAppBar = ({ session }: { session: Session }) => {
             />
           </div>
           <h1 className="text-[#f26722] font-black italic tracking-tighter text-2xl uppercase">
-            {user?.name?.split(" ")[0] ?? "Rider"}
+            {user?.name?.trim()?.split(/\s+/)?.[0] || "Rider"}
           </h1>
         </div>
         <SettingsButton onOpen={() => setOpen(true)} />
