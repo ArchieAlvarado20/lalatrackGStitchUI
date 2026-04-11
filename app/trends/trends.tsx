@@ -22,9 +22,8 @@ export default function TrendPage({ session }: { session: Session }) {
 
   return (
     <>
+      <TopAppBar session={session} />
       <LockedFeature label="Coming Soon">
-        <TopAppBar session={session} />
-
         <main className="px-6 py-6 max-w-lg mx-auto space-y-8">
           {/* Time Period Selector */}
           <div className="flex bg-[#131313] p-1.5 rounded-2xl border border-white/5">
