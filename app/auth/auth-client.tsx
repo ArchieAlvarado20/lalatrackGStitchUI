@@ -46,12 +46,7 @@ export default function AuthClientPage() {
 
     try {
       if (isSignIn) {
-        const result = await signIn(email, password);
-
-        if (!result.user) {
-          setError("Invalid email or password");
-          return;
-        }
+        await signIn(email, password);
 
         router.push("/dashboard");
       } else {
@@ -78,8 +73,8 @@ export default function AuthClientPage() {
 
         router.push("/dashboard");
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+    } catch (err) {
+      setError("Invalid email or password");
     } finally {
       setIsLoading(false);
     }
