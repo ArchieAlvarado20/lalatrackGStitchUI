@@ -1,5 +1,5 @@
 "use client";
-import { Power, Fuel, ArrowRight } from "lucide-react";
+import { Power, Fuel, ArrowRight, GiftIcon } from "lucide-react";
 import TopAppBar from "@/components/topAppBar";
 import BottomNavBar from "@/components/bottomNavBar";
 import LogItem from "@/components/logItem";
@@ -13,6 +13,8 @@ import {
   getTodayTip,
 } from "@/lib/actions/logs-actions";
 import LockedFeature from "@/components/lockedFeature";
+import SkeletonCardMedium from "@/components/skeleton";
+import IncomeLogs from "@/components/incomeLogItems";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -30,7 +32,8 @@ type Ride = {
 export default function DashboardPage({ session }: { session: Session }) {
   const [rides, setRides] = useState<Ride[]>([]);
   const [tip, setTip] = useState<number>(0);
-  const [income, setIncome] = useState<number>(0);
+  const [income, setIncome] = useState<number | "****">("****");
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadTip = async () => {
     const result = await getTodayTip(session.user.id);
@@ -40,12 +43,13 @@ export default function DashboardPage({ session }: { session: Session }) {
   const load = async () => {
     const result = await getTodayIncome(session.user.id);
     setIncome(result);
+    setIsLoading(false);
   };
 
   const loadLogs = async () => {
     const data = await getTodayRides(session.user.id);
 
-    const formatted: Ride[] = data.map((r) => ({
+    const formatted: Ride[] = data.slice(0, 3).map((r) => ({
       ...r,
       fare: Number(r.fare),
       payment: Number(r.payment),
@@ -54,6 +58,7 @@ export default function DashboardPage({ session }: { session: Session }) {
 
     setRides(formatted);
   };
+
   useEffect(() => {
     const init = async () => {
       await Promise.all([loadLogs(), loadTip(), load()]);
@@ -66,8 +71,11 @@ export default function DashboardPage({ session }: { session: Session }) {
     <>
       <TopAppBar session={session} />
 
-      <main className="px-6 pt-8 max-w-lg mx-auto">
+      <main className="px-6 pt-8 max-w-lg mx-auto pb-32">
         {/* Main Earnings Display */}
+        {/* <SkeletonCard size="sm" />
+        
+        <SkeletonCard size="lg" /> */}
         <section className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#131313] border border-white/5 rounded-full mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
@@ -76,20 +84,18 @@ export default function DashboardPage({ session }: { session: Session }) {
             </span>
           </div>
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#adaaaa] mb-2 font-black">
-            Real-time Cash + Online Income
+            Real-time Income - Expenses
           </p>
           <div className="flex items-end justify-center gap-2 mb-2">
             <h2 className="text-7xl font-black text-[#f26722] tracking-tighter italic">
-              ₱{income}
+              ₱{typeof income === "number" ? income.toFixed(2) : income}
             </h2>
             <span className="text-xl font-black text-white/40 mb-3 tracking-tighter">
               PHP
             </span>
           </div>
         </section>
-
         {/* Goal Progress Grid */}
-
         <section className="grid grid-cols-2 gap-4 mb-12 w-full items-stretch">
           <LockedFeature label="Coming Soon">
             <StatCard
@@ -111,7 +117,6 @@ export default function DashboardPage({ session }: { session: Session }) {
             />
           </LockedFeature>
         </section>
-
         {/* Recent Logs Section */}
         <section className="mb-10">
           <div className="flex items-center justify-between mb-6">
@@ -124,20 +129,16 @@ export default function DashboardPage({ session }: { session: Session }) {
               <a href="dashboard/ViewAll">View All</a>
             </button>
           </div>
-
-          <div className="space-y-3">
-            {rides.map((ride) => (
-              <LogItem
-                key={ride.id}
-                icon={() => <div className="font-black italic text-sm">D</div>}
-                title="Successful Delivery"
-                subtitle={new Date(ride.createdAt!).toLocaleString()}
-                amount={`₱${Number(ride.payment).toFixed(2)}`}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <>
+              <SkeletonCardMedium />
+              <SkeletonCardMedium />
+              <SkeletonCardMedium />
+            </>
+          ) : (
+            <IncomeLogs session={session} limit={3} />
+          )}
         </section>
-
         <LockedFeature label="Coming Soon">
           {/* Action Button */}
           <button className="w-full bg-[#f26722] text-[#0e0e0e] py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-4 shadow-[0_12px_40px_rgba(242,103,34,0.3)] hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative">

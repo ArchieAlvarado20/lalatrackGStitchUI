@@ -29,6 +29,8 @@ import {
   getExpenseTotal,
   getTodayExpense,
 } from "@/lib/actions/expense-actions";
+import SkeletonCardMedium from "@/components/skeleton";
+import IncomeLogs from "@/components/incomeLogItems";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -56,9 +58,10 @@ type Expense = {
 export default function TransactionHistory({ session }: { session: Session }) {
   const [filter, setFilter] = useState("income"); // income, expenses
   const [rides, setRides] = useState<Ride[]>([]);
-  const [totalIncome, setTotalIncome] = useState<number>(0);
+  const [totalIncome, setTotalIncome] = useState<number | "****">("****");
   const [expense, setExpense] = useState<Expense[]>([]);
-  const [expenseAmount, setExpenseAmount] = useState<number>(0);
+  const [expenseAmount, setExpenseAmount] = useState<number | "****">("****");
+  const [isLoading, setIsLoading] = useState(true);
 
   const categoryIcons: Record<string, LucideIcon> = {
     Gas: Fuel,
@@ -85,6 +88,7 @@ export default function TransactionHistory({ session }: { session: Session }) {
     }));
 
     setRides(formatted);
+    setIsLoading(false);
   };
 
   const loadExpenseAmount = async () => {
@@ -167,20 +171,20 @@ export default function TransactionHistory({ session }: { session: Session }) {
               </span>
               <div className="h-px flex-1 bg-white/5"></div>
             </div>
-            <div className="space-y-3">
-              {filter === "income"
-                ? rides.map((ride) => (
-                    <LogItem
-                      key={ride.id}
-                      icon={() => (
-                        <div className="font-black italic text-sm">D</div>
-                      )}
-                      title="Successful Delivery"
-                      subtitle={new Date(ride.createdAt!).toLocaleString()}
-                      amount={`₱${Number(ride.payment).toFixed(2)}`}
-                    />
-                  ))
-                : expense.map((expenses) => {
+            {isLoading ? (
+              <>
+                <SkeletonCardMedium />
+                <SkeletonCardMedium />
+                <SkeletonCardMedium />
+                <SkeletonCardMedium />
+                <SkeletonCardMedium />
+              </>
+            ) : (
+              <div className="space-y-3">
+                {filter === "income" ? (
+                  <IncomeLogs session={session} limit={100} />
+                ) : (
+                  expense.map((expenses) => {
                     const Icon =
                       categoryIcons[expenses.category] || MoreHorizontal;
 
@@ -198,8 +202,10 @@ export default function TransactionHistory({ session }: { session: Session }) {
                         isNegative
                       />
                     );
-                  })}
-            </div>
+                  })
+                )}
+              </div>
+            )}
           </section>
 
           {/* Yesterday */}

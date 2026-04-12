@@ -14,7 +14,7 @@ const TopAppBar = ({ session }: { session: Session }) => {
       <header className="flex items-center justify-between px-6 py-4 w-full bg-[#0e0e0e] sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-neutral-800 overflow-hidden border border-[#f26722]/20 shadow-[0_0_15px_rgba(242,103,34,0.1)]">
-            <img
+            {/* <img
               src={
                 user?.image ??
                 "data:image/svg+xml;utf8,\
@@ -32,10 +32,31 @@ const TopAppBar = ({ session }: { session: Session }) => {
               }
               alt="User Profile"
               className="w-full h-full object-cover"
+            /> */}
+            <img
+              src={
+                "data:image/svg+xml;utf8,\
+                  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>\
+                    <defs>\
+                      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>\
+                        <stop offset='0%' stop-color='%23f26722'/>\
+                        <stop offset='100%' stop-color='%23ff8a50'/>\
+                      </linearGradient>\
+                    </defs>\
+                    <rect width='100%' height='100%' rx='16' fill='%23111111'/>\
+                    <text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle'\
+                      font-family='Arial, sans-serif' font-size='32' font-weight='900'\
+                      fill='url(%23g)'>\
+                      L\
+                    </text>\
+                  </svg>"
+              }
+              alt="User Profile"
+              className="w-full h-full object-cover"
             />
           </div>
           <h1 className="text-[#f26722] font-black italic tracking-tighter text-2xl uppercase">
-            {user?.name?.trim()?.split(/\s+/)?.[0] || "Rider"}
+            {/* {user?.name?.trim()?.split(/\s+/)?.[0] || "Rider"} */}LALATRACK
           </h1>
         </div>
         <SettingsButton onOpen={() => setOpen(true)} />

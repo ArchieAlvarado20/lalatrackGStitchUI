@@ -13,25 +13,16 @@ import {
 } from "@/lib/actions/logs-actions";
 import toast from "react-hot-toast";
 import DateTime from "@/components/dateTime";
+import SkeletonCardMedium from "@/components/skeleton";
+import IncomeLogs from "@/components/incomeLogItems";
 
 type Session = typeof auth.$Infer.Session;
-
-type Ride = {
-  id: number;
-  userId: string;
-  fare: number;
-  payment: number;
-  tip: number;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-  deletedAt: Date | null;
-};
 
 export default function IncomeLogPage({ session }: { session: Session }) {
   const [fare, setFare] = useState("");
   const [payment, setPayment] = useState("");
-  const [income, setIncome] = useState<number>(0);
-  const [rides, setRides] = useState<Ride[]>([]);
+  const [income, setIncome] = useState<number | "*****">("*****");
+  const [isLoading, setIsLoading] = useState(false);
 
   const tip = (parseFloat(payment) || 0) - (parseFloat(fare) || 0);
 
@@ -40,22 +31,9 @@ export default function IncomeLogPage({ session }: { session: Session }) {
     setIncome(result);
   };
 
-  const loadLogs = async () => {
-    const data = await getTodayRides(session.user.id);
-
-    const formatted: Ride[] = data.map((r) => ({
-      ...r,
-      fare: Number(r.fare),
-      payment: Number(r.payment),
-      tip: Number(r.tip),
-    }));
-
-    setRides(formatted);
-  };
-
   useEffect(() => {
     const init = async () => {
-      await Promise.all([load(), loadLogs()]);
+      await Promise.all([load()]);
     };
 
     init();
@@ -80,6 +58,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
     }
 
     try {
+      setIsLoading(true);
       await createRide({
         fare: Number(fare),
         payment: Number(payment),
@@ -91,9 +70,10 @@ export default function IncomeLogPage({ session }: { session: Session }) {
       setPayment("");
 
       toast.success("Ride created successfully!");
+      setIsLoading(false);
 
       // 🔥 refresh data after submit
-      await Promise.all([load(), loadLogs()]);
+      await Promise.all([load()]);
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong");
@@ -103,7 +83,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
     <>
       <TopAppBar session={session} />
 
-      <main className="px-6 py-6 max-w-md mx-auto">
+      <main className="px-6 py-6 max-w-md mx-auto pb-32">
         {/* Session Summary Card */}
         <div className="bg-[#131313] p-8 rounded-[2rem] border border-white/5 mb-8 relative overflow-hidden">
           <div className="relative z-10">
@@ -111,7 +91,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
               Total Payment Recieved
             </p>
             <h2 className="text-5xl font-black text-[#f26722] tracking-tighter italic">
-              ₱{income}
+              ₱{typeof income === "number" ? income.toFixed(2) : income}
             </h2>
           </div>
           <div className="absolute right-[-20px] top-[-20px] opacity-5">
@@ -196,7 +176,8 @@ export default function IncomeLogPage({ session }: { session: Session }) {
           {/* Log Button */}
           <ActionButton
             type="submit"
-            label="Log Income"
+            disabled={isLoading}
+            label={isLoading ? "Processing" : "Log Income"}
             leftIcon={
               <DollarSign size={28} strokeWidth={3} className="animate-pulse" />
             }
@@ -205,17 +186,29 @@ export default function IncomeLogPage({ session }: { session: Session }) {
             }
           />
         </form>
-        <div className="space-y-3 mt-5  ">
-          {rides.map((ride) => (
-            <LogItem
-              key={ride.id}
-              icon={() => <div className="font-black italic text-sm">D</div>}
-              title="Successful Delivery"
-              subtitle={new Date(ride.createdAt!).toLocaleString()}
-              amount={`₱${Number(ride.payment).toFixed(2)}`}
-            />
-          ))}
-        </div>
+
+        {/* Recent Logs Section */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#adaaaa]">
+              Today
+            </span>
+            <div className="h-px flex-1 bg-white/5"></div>
+
+            <button className="text-[10px] font-black text-[#f26722] uppercase tracking-[0.2em] hover:underline underline-offset-4">
+              <a href="dashboard/ViewAll">View All</a>
+            </button>
+          </div>
+          {isLoading ? (
+            <>
+              <SkeletonCardMedium />
+              <SkeletonCardMedium />
+              <SkeletonCardMedium />
+            </>
+          ) : (
+            <IncomeLogs session={session} limit={100} />
+          )}
+        </section>
       </main>
 
       <BottomNavBar session={session} />

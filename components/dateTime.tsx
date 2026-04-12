@@ -3,12 +3,17 @@
 import { useEffect, useState } from "react";
 
 export default function DateTime() {
-  const [now, setNow] = useState(new Date());
+  const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
+    const updateTime = () => {
+      setTime(new Date().toLocaleTimeString());
+      setDate(new Date().toLocaleDateString());
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -22,7 +27,7 @@ export default function DateTime() {
         </p>
         <div className="flex items-center gap-2 text-sm font-bold">
           <span className="text-[#f26722] opacity-60">📅</span>
-          {now.toLocaleDateString()}
+          {date}
         </div>
       </div>
 
@@ -33,7 +38,7 @@ export default function DateTime() {
         </p>
         <div className="flex items-center gap-2 text-sm font-bold">
           <span className="text-[#f26722] opacity-60">🕒</span>
-          {now.toLocaleTimeString()}
+          {time}
         </div>
       </div>
     </div>

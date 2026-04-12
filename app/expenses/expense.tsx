@@ -8,7 +8,6 @@ import {
   Smartphone,
   MoreHorizontal,
   ReceiptText,
-  Camera,
   ArrowRight,
   LucideIcon,
 } from "lucide-react";
@@ -42,8 +41,9 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
   const [selectedCategory, setSelectedCategory] = useState("Gas");
   const [otherCategory, setOtherCategory] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [expenseAmount, setExpenseAmount] = useState<number>(0);
+  const [expenseAmount, setExpenseAmount] = useState<number | "****">("****");
   const [expense, setExpense] = useState<Expense[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const categories = [
     { id: "Gas", icon: Fuel },
@@ -106,6 +106,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
 
     startTransition(async () => {
       try {
+        setIsLoading(true);
         await createExpense({
           amount: Number(amount),
           category: finalCategory,
@@ -118,6 +119,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
         loadExpenseAmount();
         loadExpense();
         toast.success("Expense added successfully!");
+        setIsLoading(false);
       } catch (err) {
         console.error(err);
         toast.error("Something went wrong");
@@ -126,19 +128,22 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-['Inter'] selection:bg-[#f26722] pb-24">
+    <>
       <TopAppBar session={session} />
 
-      <main className="px-6 py-6 max-w-md mx-auto">
+      <main className="px-6 py-6 max-w-md mx-auto pb-32">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Session Summary Card */}
-          <div className="bg-[#131313] p-8 rounded-[2rem] border border-white/5 mb-8 relative overflow-hidden">
+          <div className="bg-surface-container-low p-8 rounded-4xl border border-white/5 mb-8 relative overflow-hidden">
             <div className="relative z-10">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa] mb-2">
                 Total Expenses
               </p>
               <h2 className="text-5xl font-black text-[#f26722] tracking-tighter italic">
-                ₱{expenseAmount}
+                ₱
+                {typeof expenseAmount === "number"
+                  ? expenseAmount.toFixed(2)
+                  : expenseAmount}
               </h2>
             </div>
             <div className="absolute right-[-20px] top-[-20px] opacity-5 rotate-12">
@@ -149,7 +154,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
           {/* Date & Note Section */}
           <DateTime />
 
-          <div className="bg-[#131313] p-6 rounded-[2rem] border border-white/5 space-y-8">
+          <div className="bg-surface-container-low p-6 rounded-[2rem] border border-white/5 space-y-8">
             {/* Category Section */}
             <div className="space-y-4">
               <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] ml-2">
@@ -165,7 +170,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${
                       selectedCategory === cat.id
                         ? "bg-[#20201f] border-[#f26722] text-[#f26722] shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]"
-                        : "bg-[#131313] border-white/5 text-[#adaaaa] hover:bg-[#1a1a1a]"
+                        : "bg-surface-container-low border-white/5 text-[#adaaaa] hover:bg-[#1a1a1a]"
                     }`}
                   >
                     <cat.icon size={24} className="mb-2" />
@@ -221,8 +226,8 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
           {/* Log Button */}
           <ActionButton
             type="submit"
-            label="Log Expense"
-            disabled={isPending}
+            disabled={isPending || isLoading}
+            label={isLoading ? "Processing" : "Log Expense"}
             leftIcon={
               <ReceiptText
                 size={28}
@@ -258,6 +263,6 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
       </main>
 
       <BottomNavBar session={session} />
-    </div>
+    </>
   );
 }
