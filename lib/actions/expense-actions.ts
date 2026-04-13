@@ -1,5 +1,5 @@
 "use server";
-import prisma from "../db";
+import prisma from "../prisma";
 
 export async function createExpense(data: {
   category: string;
