@@ -182,7 +182,7 @@ export default function DashboardPage({ session }: { session: Session }) {
         <section className="mb-10">
           <div className="flex items-center justify-between mb-6">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#adaaaa]">
-              Today
+              Recent Orders
             </span>
             <div className="h-px flex-1 bg-white/5"></div>
 
@@ -275,6 +275,7 @@ export default function DashboardPage({ session }: { session: Session }) {
                     new Date(b.createdAt!).getTime() -
                     new Date(a.createdAt!).getTime(),
                 )
+                .slice(0, 3)
                 .map((item) => item.element)}
             </div>
           )}
