@@ -10,6 +10,7 @@ import {
   ReceiptText,
   LucideIcon,
   DollarSign,
+  GiftIcon,
 } from "lucide-react";
 import TopAppBar from "@/components/topAppBar";
 import BottomNavBar from "@/components/bottomNavBar";
@@ -30,7 +31,6 @@ import {
   getTodayExpense,
 } from "@/lib/actions/expense-actions";
 import SkeletonCardMedium from "@/components/skeleton";
-import IncomeLogs from "@/components/incomeLogItems";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -182,7 +182,49 @@ export default function TransactionHistory({ session }: { session: Session }) {
             ) : (
               <div className="space-y-3">
                 {filter === "income" ? (
-                  <IncomeLogs session={session} limit={100} />
+                  <div className="space-y-3">
+                    {rides.map((ride) => (
+                      <div key={ride.id}>
+                        {/* Fare */}
+                        <LogItem
+                          icon={() => (
+                            <div className="font-black italic text-sm">₱</div>
+                          )}
+                          title="Actual Fare"
+                          subtitle={new Date(ride.createdAt!).toLocaleString()}
+                          amount={`₱${Number(ride.fare).toFixed(2)}`}
+                          isFare
+                        />
+                        <div className="mb-3"></div>
+                        {/* Paymenr */}
+                        {ride.payment && (
+                          <LogItem
+                            icon={() => (
+                              <div className="font-black italic text-sm">D</div>
+                            )}
+                            title="Payment Received"
+                            subtitle={new Date(
+                              ride.createdAt!,
+                            ).toLocaleString()}
+                            amount={`₱${Number(ride.payment).toFixed(2)}`}
+                          />
+                        )}
+                        <div className="mb-3"></div>
+                        {/* Tip */}
+                        {ride.tip != 0 && (
+                          <LogItem
+                            icon={GiftIcon}
+                            title="Tip Received"
+                            subtitle={new Date(
+                              ride.createdAt!,
+                            ).toLocaleString()}
+                            amount={`₱${Number(ride.tip).toFixed(2)}`}
+                            isTip
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   expense.map((expenses) => {
                     const Icon =

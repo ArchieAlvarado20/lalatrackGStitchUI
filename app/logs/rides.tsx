@@ -14,7 +14,17 @@ import {
 import toast from "react-hot-toast";
 import DateTime from "@/components/dateTime";
 import SkeletonCardMedium from "@/components/skeleton";
-import IncomeLogs from "@/components/incomeLogItems";
+
+type Ride = {
+  id: number;
+  userId: string;
+  fare: number;
+  payment: number;
+  tip: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
 
 type Session = typeof auth.$Infer.Session;
 
@@ -23,6 +33,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
   const [payment, setPayment] = useState("");
   const [income, setIncome] = useState<number | "*****">("*****");
   const [isLoading, setIsLoading] = useState(false);
+  const [rides, setRides] = useState<Ride[]>([]);
 
   const tip = (parseFloat(payment) || 0) - (parseFloat(fare) || 0);
 
@@ -30,10 +41,22 @@ export default function IncomeLogPage({ session }: { session: Session }) {
     const result = await getTodayIncome(session.user.id);
     setIncome(result);
   };
+  const loadLogs = async () => {
+    const data = await getTodayRides(session.user.id);
+
+    const formatted: Ride[] = data.map((r) => ({
+      ...r,
+      fare: Number(r.fare),
+      payment: Number(r.payment),
+      tip: Number(r.tip),
+    }));
+
+    setRides(formatted);
+  };
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([load()]);
+      await Promise.all([load(), loadLogs()]);
     };
 
     init();
@@ -73,7 +96,7 @@ export default function IncomeLogPage({ session }: { session: Session }) {
       setIsLoading(false);
 
       // 🔥 refresh data after submit
-      await Promise.all([load()]);
+      await Promise.all([load(), loadLogs()]);
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong");
@@ -206,7 +229,45 @@ export default function IncomeLogPage({ session }: { session: Session }) {
               <SkeletonCardMedium />
             </>
           ) : (
-            <IncomeLogs session={session} limit={100} />
+            <div className="space-y-3">
+              {rides.map((ride) => (
+                <div key={ride.id}>
+                  {/* Fare */}
+                  <LogItem
+                    icon={() => (
+                      <div className="font-black italic text-sm">₱</div>
+                    )}
+                    title="Actual Fare"
+                    subtitle={new Date(ride.createdAt!).toLocaleString()}
+                    amount={`₱${Number(ride.fare).toFixed(2)}`}
+                    isFare
+                  />
+                  <div className="mb-3"></div>
+                  {/* Paymenr */}
+                  {ride.payment && (
+                    <LogItem
+                      icon={() => (
+                        <div className="font-black italic text-sm">D</div>
+                      )}
+                      title="Payment Received"
+                      subtitle={new Date(ride.createdAt!).toLocaleString()}
+                      amount={`₱${Number(ride.payment).toFixed(2)}`}
+                    />
+                  )}
+                  <div className="mb-3"></div>
+                  {/* Tip */}
+                  {ride.tip != 0 && (
+                    <LogItem
+                      icon={GiftIcon}
+                      title="Tip Received"
+                      subtitle={new Date(ride.createdAt!).toLocaleString()}
+                      amount={`₱${Number(ride.tip).toFixed(2)}`}
+                      isTip
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </section>
       </main>

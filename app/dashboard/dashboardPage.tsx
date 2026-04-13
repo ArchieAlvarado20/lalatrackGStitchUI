@@ -1,5 +1,16 @@
 "use client";
-import { Power, Fuel, ArrowRight, GiftIcon } from "lucide-react";
+import {
+  Power,
+  Fuel,
+  ArrowRight,
+  GiftIcon,
+  LucideIcon,
+  Utensils,
+  Wallet,
+  Wrench,
+  Smartphone,
+  MoreHorizontal,
+} from "lucide-react";
 import TopAppBar from "@/components/topAppBar";
 import BottomNavBar from "@/components/bottomNavBar";
 import LogItem from "@/components/logItem";
@@ -14,7 +25,10 @@ import {
 } from "@/lib/actions/logs-actions";
 import LockedFeature from "@/components/lockedFeature";
 import SkeletonCardMedium from "@/components/skeleton";
-import IncomeLogs from "@/components/incomeLogItems";
+import {
+  getTodayExpense,
+  getTodayExpenseAmount,
+} from "@/lib/actions/expense-actions";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -29,11 +43,23 @@ type Ride = {
   deletedAt: Date | null;
 };
 
+type Expense = {
+  id: number;
+  userId: string;
+  amount: number;
+  category: string;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  deletedAt: Date | null;
+};
+
 export default function DashboardPage({ session }: { session: Session }) {
   const [rides, setRides] = useState<Ride[]>([]);
   const [tip, setTip] = useState<number>(0);
-  const [income, setIncome] = useState<number | "****">("****");
+  const [income, setIncome] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [expenseAmount, setExpenseAmount] = useState<number>(0);
+  const [expense, setExpense] = useState<Expense[]>([]);
 
   const loadTip = async () => {
     const result = await getTodayTip(session.user.id);
@@ -44,6 +70,11 @@ export default function DashboardPage({ session }: { session: Session }) {
     const result = await getTodayIncome(session.user.id);
     setIncome(result);
     setIsLoading(false);
+  };
+
+  const loadExpenseAmount = async () => {
+    const result = await getTodayExpenseAmount(session.user.id);
+    setExpenseAmount(result);
   };
 
   const loadLogs = async () => {
@@ -59,13 +90,42 @@ export default function DashboardPage({ session }: { session: Session }) {
     setRides(formatted);
   };
 
+  const categoryIcons: Record<string, LucideIcon> = {
+    Gas: Fuel,
+    Food: Utensils,
+    Topup: Wallet,
+    Maintenance: Wrench,
+    Load: Smartphone,
+    Others: MoreHorizontal,
+  };
+
+  const loadExpense = async () => {
+    const data = await getTodayExpense(session.user.id);
+
+    const formatted: Expense[] = data.slice(0, 3).map((r) => ({
+      ...r,
+      category: String(r.category),
+      amount: Number(r.amount),
+    }));
+
+    setExpense(formatted);
+  };
+
   useEffect(() => {
     const init = async () => {
-      await Promise.all([loadLogs(), loadTip(), load()]);
+      await Promise.all([
+        loadLogs(),
+        loadTip(),
+        load(),
+        loadExpenseAmount(),
+        loadExpense(),
+      ]);
     };
 
     init();
   }, []);
+
+  const balance = Number(income || 0) - Number(expenseAmount || 0);
 
   return (
     <>
@@ -84,11 +144,12 @@ export default function DashboardPage({ session }: { session: Session }) {
             </span>
           </div>
           <p className="text-[10px] uppercase tracking-[0.4em] text-[#adaaaa] mb-2 font-black">
-            Real-time Income - Expenses
+            Real-time Income(₱{Number(income)}) - Expenses ( ₱
+            {Number(expenseAmount)})
           </p>
           <div className="flex items-end justify-center gap-2 mb-2">
             <h2 className="text-7xl font-black text-[#f26722] tracking-tighter italic">
-              ₱{typeof income === "number" ? income.toFixed(2) : income}
+              {isLoading ? "₱****" : `₱${balance.toFixed(2)}`}
             </h2>
             <span className="text-xl font-black text-white/40 mb-3 tracking-tighter">
               PHP
@@ -129,6 +190,7 @@ export default function DashboardPage({ session }: { session: Session }) {
               <a href="dashboard/ViewAll">View All</a>
             </button>
           </div>
+
           {isLoading ? (
             <>
               <SkeletonCardMedium />
@@ -136,8 +198,88 @@ export default function DashboardPage({ session }: { session: Session }) {
               <SkeletonCardMedium />
             </>
           ) : (
-            <IncomeLogs session={session} limit={3} />
+            <div className="space-y-3">
+              {[
+                // Rides
+                ...rides.map((ride) => ({
+                  id: `ride-${ride.id}`,
+                  type: "ride",
+                  createdAt: ride.createdAt,
+                  element: (
+                    <div key={`ride-${ride.id}`}>
+                      <LogItem
+                        icon={() => (
+                          <div className="font-black italic text-sm">₱</div>
+                        )}
+                        title="Actual Fare"
+                        subtitle={new Date(ride.createdAt!).toLocaleString()}
+                        amount={`₱${Number(ride.fare).toFixed(2)}`}
+                        isFare
+                      />
+
+                      <div className="mb-3"></div>
+
+                      {ride.payment && (
+                        <LogItem
+                          icon={() => (
+                            <div className="font-black italic text-sm">D</div>
+                          )}
+                          title="Payment Received"
+                          subtitle={new Date(ride.createdAt!).toLocaleString()}
+                          amount={`₱${Number(ride.payment).toFixed(2)}`}
+                        />
+                      )}
+
+                      <div className="mb-3"></div>
+
+                      {ride.tip != 0 && (
+                        <LogItem
+                          icon={GiftIcon}
+                          title="Tip Received"
+                          subtitle={new Date(ride.createdAt!).toLocaleString()}
+                          amount={`₱${Number(ride.tip).toFixed(2)}`}
+                          isTip
+                        />
+                      )}
+                    </div>
+                  ),
+                })),
+
+                // Expenses
+                ...expense.map((exp) => {
+                  const Icon = categoryIcons[exp.category] || MoreHorizontal;
+
+                  return {
+                    id: `exp-${exp.id}`,
+                    type: "expense",
+                    createdAt: exp.createdAt,
+                    element: (
+                      <LogItem
+                        key={`exp-${exp.id}`}
+                        icon={Icon}
+                        title={exp.category}
+                        subtitle={
+                          exp.createdAt
+                            ? new Date(exp.createdAt).toLocaleString()
+                            : "No date"
+                        }
+                        amount={`-₱${exp.amount.toFixed(2)}`}
+                        isNegative
+                      />
+                    ),
+                  };
+                }),
+              ]
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt!).getTime() -
+                    new Date(a.createdAt!).getTime(),
+                )
+                .map((item) => item.element)}
+            </div>
           )}
+
+          <div className="space-y-3 mt-5"></div>
         </section>
         <LockedFeature label="Coming Soon">
           {/* Action Button */}

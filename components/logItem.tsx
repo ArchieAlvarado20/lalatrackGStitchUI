@@ -20,7 +20,15 @@ const LogItem = ({
   <div className="bg-[#131313] p-4 rounded-2xl border border-white/5 flex items-center justify-between group hover:bg-[#1a1a1a] transition-all">
     <div className="flex items-center gap-4">
       <div
-        className={`w-12 h-12 bg-[#20201f] rounded-xl flex items-center justify-center text-[#f26722] border border-white/5 group-hover:scale-110 transition-transform ${isTip ? "text-green-500" : "text-[#f26722]"} ${isFare ? "text-yellow-500" : "text-[#f26722]"}`}
+        className={`w-12 h-12 bg-[#20201f] rounded-xl flex items-center justify-center text-[#f26722] border border-white/5 group-hover:scale-110 transition-transform  ${
+          isNegative
+            ? "text-[#ff6b6b]"
+            : isTip
+              ? "text-green-500"
+              : isFare
+                ? "text-yellow-500"
+                : "text-[#f26722]"
+        }`}
       >
         <Icon size={20} />
       </div>
