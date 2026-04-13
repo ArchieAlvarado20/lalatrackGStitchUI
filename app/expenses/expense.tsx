@@ -146,7 +146,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
                   : expenseAmount}
               </h2>
             </div>
-            <div className="absolute right-[-20px] top-[-20px] opacity-5 rotate-12">
+            <div className="absolute right-5 top-5 opacity-5 rotate-12">
               <ReceiptText size={160} />
             </div>
           </div>

@@ -44,12 +44,18 @@ export default function AuthClientPage() {
     setIsLoading(true);
     setError("");
 
-    try {
-      if (isSignIn) {
+    if (isSignIn) {
+      try {
         await signIn(email, password);
 
         router.push("/dashboard");
-      } else {
+      } catch (err) {
+        setError("Invalid email or password");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      try {
         if (password.length < 8) {
           setError("Password must be at least 8 characters");
           return;
@@ -72,11 +78,11 @@ export default function AuthClientPage() {
         });
 
         router.push("/dashboard");
+      } catch (err) {
+        setError("Email already exists");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError("Invalid email or password");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -92,10 +98,10 @@ export default function AuthClientPage() {
 
       {/* Brand Header */}
       <div className="text-center mb-16">
-        <h1 className="text-[#f26722] font-black italic tracking-tighter text-6xl mb-2">
+        <h1 className="text-[#f26722] font-extrabold tracking-tighter text-6xl mb-2">
           Lalatrack
         </h1>
-        <div className="text-[10px] font-bold text-[#adaaaa] uppercase tracking-[0.4em]">
+        <div className="text-[10px] font-bold text-on-surface uppercase tracking-[0.4em]">
           Kinetic Logistics Command
         </div>
       </div>
@@ -103,7 +109,7 @@ export default function AuthClientPage() {
       {error && (
         <div className="relative flex items-start gap-1 m-auto rounded-2xl border border-red-500/20 bg-red-500/10 backdrop-blur-md p-4 shadow-lg">
           {/* Icon */}
-          <div className="flex-shrink-0 mt-0.5">
+          <div className="shrink-0 mt-0.5">
             <svg
               className="h-5 w-5 text-red-400"
               viewBox="0 0 20 20"
@@ -232,11 +238,11 @@ export default function AuthClientPage() {
           </button>
         </form>
         <div className="flex items-center gap-4 py-2">
-          <div className="h-px bg-surface-variant flex-grow"></div>
+          <div className="h-px bg-surface-variant grow"></div>
           <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
             or
           </span>
-          <div className="h-px bg-surface-variant flex-grow"></div>
+          <div className="h-px bg-surface-variant grow"></div>
         </div>
 
         <button
@@ -252,7 +258,7 @@ export default function AuthClientPage() {
 
         {/* TOGGLE */}
         <div className="text-center mt-5 mb-5">
-          <p className="text-xs text-[#adaaaa] font-medium">
+          <p className="text-xs text-on-surface font-medium">
             {isSignIn ? "No account?" : "Already have account?"}
             <button
               className="text-[#f26722] font-bold ml-2 hover:underline underline-offset-4 cursor-pointer"
