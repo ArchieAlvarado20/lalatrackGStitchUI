@@ -17,11 +17,8 @@ import LogItem from "@/components/logItem";
 import StatCard from "@/components/statCard";
 import { auth } from "@/lib/auth";
 import { useState, useEffect } from "react";
-import {
-  getTodayNetIncome,
-  getTodayRides,
-  getTodayTip,
-} from "@/lib/actions/logs-actions";
+import { getTodayRides, getTodayTip } from "@/lib/actions/logs-actions";
+import { getTodayNetIncome } from "@/lib/actions/dashboard.action";
 import LockedFeature from "@/components/lockedFeature";
 import SkeletonCardMedium from "@/components/skeleton";
 import {
@@ -64,7 +61,9 @@ export default function DashboardPage({ session }: { session: Session }) {
 
   const loadNetIncome = async () => {
     const result = await getTodayNetIncome(session.user.id);
-    setNetIncome(result);
+    setNetIncome(result.net);
+    setIncome(result.rides);
+    setExpenseAmount(result.expense);
   };
 
   const loadTip = async () => {

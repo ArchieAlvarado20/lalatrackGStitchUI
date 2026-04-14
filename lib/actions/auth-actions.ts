@@ -44,3 +44,38 @@ export const signOut = async () => {
   const result = await auth.api.signOut({ headers: await headers() });
   return result;
 };
+
+export async function requestPasswordReset(email: string) {
+  try {
+    const res = await auth.api.requestPasswordReset({
+      body: { email, redirectTo: "/auth/resetPassword" },
+    });
+
+    return { success: true, data: res };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to send reset email",
+    };
+  }
+}
+
+export async function resetPasswordAction(token: string, password: string) {
+  try {
+    const res = await auth.api.resetPassword({
+      body: {
+        token,
+        newPassword: password,
+      },
+    });
+
+    return { success: true, data: res };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to reset password",
+    };
+  }
+}

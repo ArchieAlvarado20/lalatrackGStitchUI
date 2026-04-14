@@ -29,7 +29,7 @@ const BottomNavBar = ({ session }: { session: Session | null }) => {
               setActive(item.href);
               router.push(item.href);
             }}
-            className={`flex flex-col items-center justify-center transition-all px-4 py-2 rounded-2xl ${
+            className={`flex flex-col items-center justify-center transition-all px-4 py-2 rounded-2xl cursor-pointer ${
               isActive
                 ? "text-primary scale-110 shadow-[inset_0_2px_4px_rgba(255,255,255,0.05)] rounded-2xl"
                 : "text-[#adaaaa] opacity-60 hover:opacity-100"

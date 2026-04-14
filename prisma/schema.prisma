@@ -102,3 +102,10 @@ model Expense{
   @@map("expenses")
   @@index([userId])
 }
+model PasswordResetLog {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  url       String
+  createdAt DateTime @default(now())
+}

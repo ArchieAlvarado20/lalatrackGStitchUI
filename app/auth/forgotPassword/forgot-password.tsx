@@ -13,14 +13,29 @@ import {
 import { InputField } from "@/components/authInput";
 import Link from "next/link";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { requestPasswordReset } from "@/lib/actions/auth-actions";
+
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Reset link requested for:", email);
-    setIsSubmitted(true);
+    setIsLoading(true);
+
+    const result = await requestPasswordReset(email);
+
+    if (!result.success) {
+      setError(true);
+    } else {
+      setIsSubmitted(true);
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -77,7 +92,7 @@ export default function ForgotPasswordPage() {
               <ShieldQuestion size={24} />
             </div>
             <h3 className="font-black italic text-lg uppercase tracking-tighter mb-2">
-              Check Your Fleet Inbox
+              Check Your Email
             </h3>
             <p className="text-xs text-[#adaaaa] font-medium leading-relaxed">
               If an account exists for{" "}
