@@ -7,6 +7,7 @@ import { FcGoogle } from "react-icons/fc";
 import { signIn, signInSocial, signUp } from "@/lib/actions/auth-actions";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics";
+import Link from "next/link";
 
 export default function AuthClientPage() {
   const router = useRouter();
@@ -187,12 +188,12 @@ export default function AuthClientPage() {
           />
           {isSignIn && (
             <div className="flex">
-              <a
+              <Link
                 className="text-[10px] ml-auto font-bold uppercase tracking-widest text-primary-fixed-dim hover:text-primary transition-colors"
-                href="#"
+                href="/auth/forgotPassword"
               >
                 Forgot Password?
-              </a>
+              </Link>
             </div>
           )}
 

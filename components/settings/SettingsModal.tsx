@@ -70,6 +70,7 @@ export default function SettingsModal({ open, onClose }: SettingsProps) {
             className="w-full h-full object-cover"
           />
         </div>
+
         {/* Profile */}
         <button className="w-full flex flex-col items-center justify-center gap-1 p-4 hover:bg-white/5 rounded-lg transition cursor-pointer">
           <span className="material-symbols-outlined text-primary text-2xl">

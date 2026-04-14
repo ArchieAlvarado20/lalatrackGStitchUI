@@ -23,6 +23,7 @@ import {
 } from "@/lib/actions/expense-actions";
 import toast from "react-hot-toast";
 import DateTime from "@/components/dateTime";
+import Loading from "@/components/loading";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -41,7 +42,7 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
   const [selectedCategory, setSelectedCategory] = useState("Gas");
   const [otherCategory, setOtherCategory] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [expenseAmount, setExpenseAmount] = useState<number | "****">("****");
+  const [expenseAmount, setExpenseAmount] = useState<number | "00.00">("00.00");
   const [expense, setExpense] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -82,7 +83,10 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([loadExpenseAmount(), loadExpense()]);
+      setIsLoading(true);
+      await loadExpenseAmount();
+      await loadExpense();
+      setIsLoading(false);
     };
 
     init();
@@ -105,8 +109,8 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
     }
 
     startTransition(async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         await createExpense({
           amount: Number(amount),
           category: finalCategory,
@@ -130,137 +134,140 @@ export default function ExpenseLogPage({ session }: { session: Session }) {
   return (
     <>
       <TopAppBar session={session} />
-
-      <main className="px-6 py-6 max-w-md mx-auto pb-32">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Session Summary Card */}
-          <div className="bg-surface-container-low p-8 rounded-4xl border border-white/5 mb-8 relative overflow-hidden">
-            <div className="relative z-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa] mb-2">
-                Total Expenses
-              </p>
-              <h2 className="text-5xl font-black text-[#f26722] tracking-tighter italic">
-                ₱
-                {typeof expenseAmount === "number"
-                  ? expenseAmount.toFixed(2)
-                  : expenseAmount}
-              </h2>
-            </div>
-            <div className="absolute right-5 top-5 opacity-5 rotate-12">
-              <ReceiptText size={160} />
-            </div>
-          </div>
-
-          {/* Date & Note Section */}
-          <DateTime />
-
-          <div className="bg-surface-container-low p-6 rounded-[2rem] border border-white/5 space-y-8">
-            {/* Category Section */}
-            <div className="space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] ml-2">
-                Category
-              </p>
-              <div className="grid grid-cols-3 gap-3">
-                {categories.map((cat) => (
-                  <button
-                    name="category"
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${
-                      selectedCategory === cat.id
-                        ? "bg-[#20201f] border-[#f26722] text-[#f26722] shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]"
-                        : "bg-surface-container-low border-white/5 text-[#adaaaa] hover:bg-[#1a1a1a]"
-                    }`}
-                  >
-                    <cat.icon size={24} className="mb-2" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">
-                      {cat.id}
-                    </span>
-                  </button>
-                ))}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <main className="px-6 py-6 max-w-md mx-auto pb-32">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Session Summary Card */}
+            <div className="bg-surface-container-low p-8 rounded-4xl border border-white/5 mb-8 relative overflow-hidden">
+              <div className="relative z-10">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa] mb-2">
+                  Total Expenses
+                </p>
+                <h2 className="text-5xl font-black text-[#f26722] tracking-tighter italic">
+                  ₱
+                  {typeof expenseAmount === "number"
+                    ? expenseAmount.toFixed(2)
+                    : expenseAmount}
+                </h2>
+              </div>
+              <div className="absolute right-5 top-5 opacity-5 rotate-12">
+                <ReceiptText size={160} />
               </div>
             </div>
-            {/* Expense Input*/}
-            <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] block ml-1">
-                Total Expense
-              </label>
-              <div className="relative group">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#f26722] font-black text-2xl">
-                  $
+
+            {/* Date & Note Section */}
+            <DateTime />
+
+            <div className="bg-surface-container-low p-6 rounded-[2rem] border border-white/5 space-y-8">
+              {/* Category Section */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] ml-2">
+                  Category
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  {categories.map((cat) => (
+                    <button
+                      name="category"
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${
+                        selectedCategory === cat.id
+                          ? "bg-[#20201f] border-[#f26722] text-[#f26722] shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]"
+                          : "bg-surface-container-low border-white/5 text-[#adaaaa] hover:bg-[#1a1a1a]"
+                      }`}
+                    >
+                      <cat.icon size={24} className="mb-2" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        {cat.id}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-                <input
-                  name="amount"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-white/5 rounded-2xl p-3 pl-12 text-3xl font-black text-white outline-none focus:border-[#f26722]/40 transition-all placeholder:text-neutral-800"
-                  placeholder="0.00"
-                />
               </div>
-            </div>
-            {/* Dynamic "Others" Input */}
-            {selectedCategory === "Others" && (
-              <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] ml-4">
-                  Specify Category
+              {/* Expense Input*/}
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] block ml-1">
+                  Total Expense
                 </label>
-                <input
-                  type="text"
-                  value={otherCategory}
-                  onChange={(e) =>
-                    setOtherCategory(
-                      e.target.value.charAt(0).toUpperCase() +
-                        e.target.value.slice(1),
-                    )
-                  }
-                  className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl p-5 text-white outline-none focus:border-[#f26722]/50 transition-colors placeholder:text-neutral-700 font-bold"
-                  placeholder="e.g. Parking, Toll"
-                  required={selectedCategory === "Others"}
-                />
+                <div className="relative group">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#f26722] font-black text-2xl">
+                    ₱
+                  </div>
+                  <input
+                    name="amount"
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full bg-[#0e0e0e] border border-white/5 rounded-2xl p-3 pl-12 text-3xl font-black text-white outline-none focus:border-[#f26722]/40 transition-all placeholder:text-neutral-800"
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
-            )}
+              {/* Dynamic "Others" Input */}
+              {selectedCategory === "Others" && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa] ml-4">
+                    Specify Category
+                  </label>
+                  <input
+                    type="text"
+                    value={otherCategory}
+                    onChange={(e) =>
+                      setOtherCategory(
+                        e.target.value.charAt(0).toUpperCase() +
+                          e.target.value.slice(1),
+                      )
+                    }
+                    className="w-full bg-[#0c0c0c] border border-white/5 rounded-2xl p-5 text-white outline-none focus:border-[#f26722]/50 transition-colors placeholder:text-neutral-700 font-bold"
+                    placeholder="e.g. Parking, Toll"
+                    required={selectedCategory === "Others"}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Log Button */}
+            <ActionButton
+              type="submit"
+              disabled={isPending || isLoading}
+              label={isLoading ? "Processing" : "Log Expense"}
+              leftIcon={
+                <ReceiptText
+                  size={28}
+                  strokeWidth={3}
+                  className="animate-pulse"
+                />
+              }
+              rightIcon={
+                <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+              }
+            />
+          </form>
+          <div className="space-y-3 mt-5  ">
+            {expense.map((expenses) => {
+              const Icon = categoryIcons[expenses.category] || MoreHorizontal;
+
+              return (
+                <LogItem
+                  key={expenses.id}
+                  icon={Icon}
+                  title={expenses.category}
+                  subtitle={
+                    expenses.createdAt
+                      ? new Date(expenses.createdAt).toLocaleString()
+                      : "No date"
+                  }
+                  amount={`-₱${expenses.amount.toFixed(2)}`}
+                  isNegative
+                />
+              );
+            })}
           </div>
-
-          {/* Log Button */}
-          <ActionButton
-            type="submit"
-            disabled={isPending || isLoading}
-            label={isLoading ? "Processing" : "Log Expense"}
-            leftIcon={
-              <ReceiptText
-                size={28}
-                strokeWidth={3}
-                className="animate-pulse"
-              />
-            }
-            rightIcon={
-              <ArrowRight className="group-hover:translate-x-2 transition-transform" />
-            }
-          />
-        </form>
-        <div className="space-y-3 mt-5  ">
-          {expense.map((expenses) => {
-            const Icon = categoryIcons[expenses.category] || MoreHorizontal;
-
-            return (
-              <LogItem
-                key={expenses.id}
-                icon={Icon}
-                title={expenses.category}
-                subtitle={
-                  expenses.createdAt
-                    ? new Date(expenses.createdAt).toLocaleString()
-                    : "No date"
-                }
-                amount={`-₱${expenses.amount.toFixed(2)}`}
-                isNegative
-              />
-            );
-          })}
-        </div>
-      </main>
+        </main>
+      )}
 
       <BottomNavBar session={session} />
     </>
