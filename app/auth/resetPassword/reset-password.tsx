@@ -13,23 +13,20 @@ import {
   Circle,
 } from "lucide-react";
 import { resetPasswordAction } from "@/lib/actions/auth-actions";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function PasswordResetPage() {
+export default function PasswordResetPage({ token }: { token?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const requirements = [
     { label: "At least 8 characters", met: password.length >= 8 },
     { label: "One special character (!@#$)", met: /[!@#$%^&*]/.test(password) },
     { label: "Must include one number", met: /\d/.test(password) },
   ];
-
-  const token = searchParams.get("token");
 
   const handleSubmit = async () => {
     if (!token) return;
