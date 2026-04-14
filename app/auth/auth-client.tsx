@@ -227,7 +227,7 @@ export default function AuthClientPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-[#f26722] text-white py-6 mt-4 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(242,103,34,0.3)] hover:scale-[1.02] active:scale-95 transition-all group"
+            className="w-full bg-[#f26722] text-white py-6 mt-4 rounded-2xl font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 shadow-[0_8px_32px_rgba(242,103,34,0.3)] hover:scale-[1.02] active:scale-95 transition-all group curs"
           >
             {isLoading
               ? isSignIn
