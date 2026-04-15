@@ -31,7 +31,7 @@ export default function Home() {
           </div>
           <Link
             href="/auth"
-            className="bg-primary-container text-on-primary-container font-bold px-6 py-2 rounded-lg hover:scale-95 transition-all duration-200 active:scale-95 shadow-lg inline-block text-center"
+            className="bg-[#f26722] text-on-primary-container font-bold px-6 py-2 rounded-lg hover:scale-95 transition-all duration-200 active:scale-95 shadow-lg inline-block text-center"
           >
             Login
           </Link>
@@ -49,7 +49,7 @@ export default function Home() {
             </div>
             <h1 className="text-5xl lg:text-7xl font-black font-headline tracking-tighter leading-[0.9] mb-6">
               Track Every{" "}
-              <span className="text-primary italic">Kilometer.</span>
+              <span className="text-[#f26722] italic">Kilometer.</span>
               <br />
               Own Every <span className="text-secondary italic">Centavo.</span>
             </h1>
@@ -59,7 +59,7 @@ export default function Home() {
               tracking in one kinetic cockpit.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <button className="w-full sm:w-auto px-8 py-4 bg-primary text-on-primary font-black rounded-xl text-lg neumorphic-flat hover:bg-primary-fixed transition-all flex items-center justify-center gap-2">
+              <button className="w-full sm:w-auto px-8 py-4 bg-[#f26722] text-on-primary font-black rounded-xl text-lg neumorphic-flat hover:bg-primary-fixed transition-all flex items-center justify-center gap-2">
                 Join the Fleet
                 <span className="material-symbols-outlined">bolt</span>
               </button>
@@ -140,7 +140,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-auto pb-4">
-                  <div className="h-12 w-full bg-primary rounded-xl flex items-center justify-center font-black text-sm text-on-primary neumorphic-flat">
+                  <div className="h-12 w-full bg-[#f26722] rounded-xl flex items-center justify-center font-black text-sm text-on-primary neumorphic-flat">
                     START SHIFT
                   </div>
                 </div>

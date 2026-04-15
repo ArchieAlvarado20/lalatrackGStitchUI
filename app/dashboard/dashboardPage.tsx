@@ -27,7 +27,7 @@ import {
 } from "@/lib/actions/expense-actions";
 import Loading from "@/components/loading";
 import toast from "react-hot-toast";
-import { endShift, startShift } from "@/lib/actions/shift.actions";
+import { activeShift, endShift, startShift } from "@/lib/actions/shift.actions";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -54,24 +54,20 @@ type Expense = {
 
 export default function DashboardPage({ session }: { session: Session }) {
   const [rides, setRides] = useState<Ride[]>([]);
-  const [tip, setTip] = useState<number>(0);
   const [income, setIncome] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [expenseAmount, setExpenseAmount] = useState<number>(0);
   const [expense, setExpense] = useState<Expense[]>([]);
   const [netIncome, setNetIncome] = useState<number>(0);
   const [shift, setShift] = useState(false);
+  const [activeShiftTime, setActiveShiftTime] = useState(0);
+  const hasActiveShift = !!activeShiftTime;
 
   const loadNetIncome = async () => {
     const result = await getTodayNetIncome(session.user.id);
     setNetIncome(result.net);
     setIncome(result.rides);
     setExpenseAmount(result.expense);
-  };
-
-  const loadTip = async () => {
-    const result = await getTodayTip(session.user.id);
-    setTip(result);
   };
 
   const loadLogs = async () => {
@@ -108,15 +104,35 @@ export default function DashboardPage({ session }: { session: Session }) {
     setExpense(formatted);
   };
 
+  const loadActiveShift = async () => {
+    const result = await activeShift({
+      userId: session.user.id,
+    });
+    const start = result?.startTime;
+
+    setInterval(() => {
+      if (start) {
+        const time = Date.now() - new Date(start).getTime();
+        setActiveShiftTime(time ?? null);
+      }
+    }, 1000);
+  };
+
+  const hours = Math.floor(activeShiftTime / (1000 * 60 * 60));
+  const minutes = Math.floor((activeShiftTime / (1000 * 60)) % 60);
+  const seconds = Math.floor((activeShiftTime / 1000) % 60);
+
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
 
-      await loadLogs();
-      await loadTip();
-      await loadExpense();
-      await loadNetIncome();
-
+      await Promise.allSettled([
+        loadLogs(),
+        loadExpense(),
+        loadNetIncome(),
+        loadActiveShift(),
+      ]);
+      setActiveShiftTime(activeShiftTime);
       setIsLoading(false);
     };
 
@@ -125,37 +141,34 @@ export default function DashboardPage({ session }: { session: Session }) {
 
   const handleStartShift = async () => {
     try {
-      setIsLoading(true);
-
       await startShift({
         userId: session.user.id,
       });
 
-      setShift(true);
+      setActiveShiftTime(activeShiftTime);
 
       toast.success("Shift started!");
-    } catch (err) {
-      toast.error("Failed to start shift");
-    } finally {
-      setIsLoading(false);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to start shift";
+      toast.error(message);
     }
   };
 
   const handleEndShift = async () => {
     try {
-      setIsLoading(true);
-
       await endShift({
         userId: session.user.id,
       });
 
       setShift(false);
+      setActiveShiftTime(0);
 
       toast.success("Shift ended!");
-    } catch (err) {
-      toast.error("Failed to end shift");
-    } finally {
-      setIsLoading(false);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to end shift";
+      toast.error(message);
     }
   };
 
@@ -171,12 +184,19 @@ export default function DashboardPage({ session }: { session: Session }) {
         
         <SkeletonCard size="lg" /> */}
           <section className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#131313] border border-white/5 rounded-full mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-[10px] font-black text-[#adaaaa] uppercase tracking-[0.2em]">
-                Shift Active: 4h 12m
-              </span>
-            </div>
+            {hasActiveShift || shift ? (
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#131313] border border-white/5 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+
+                <span className="text-[10px] font-black text-[#adaaaa] uppercase tracking-[0.2em]">
+                  Shift Active:{`${hours > 0 ? `${hours}h ` : ""}`}{" "}
+                  {`${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`}
+                </span>
+              </div>
+            ) : (
+              ""
+            )}
+
             <p className="text-[10px] uppercase tracking-[0.4em] text-[#adaaaa] mb-2 font-black">
               Real-time Daily Profit Monitoring
             </p>
@@ -327,12 +347,12 @@ export default function DashboardPage({ session }: { session: Session }) {
           {/* <LockedFeature label="Coming Soon"> */}
           {/* Action Button */}
           <button
-            onClick={!shift ? handleStartShift : handleEndShift}
-            className="w-full bg-[#f26722] text-[#0e0e0e] py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-4 shadow-[0_12px_40px_rgba(242,103,34,0.3)] hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative"
+            onClick={activeShiftTime > 0 ? handleEndShift : handleStartShift}
+            className={`w-full text-[#0e0e0e] py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative cursor-pointer  ${activeShiftTime > 0 ? "bg-[#59b602] shadow-[0_12px_40px_rgba(22,163,74,0.3)]" : "bg-[#f26722] shadow-[0_12px_40px_rgba(242,103,34,0.3)] "}`}
           >
             <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
             <Power size={28} strokeWidth={3} className="animate-pulse" />
-            {shift ? "STOP SHIFT" : "START SHIFT"}
+            {activeShiftTime > 0 ? "END SHIFT" : "START SHIFT"}
 
             <ArrowRight
               size={20}
