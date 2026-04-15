@@ -1,9 +1,11 @@
 import PasswordResetPage from "./reset-password";
 
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 }) {
-  return <PasswordResetPage token={searchParams.token} />;
+  const params = await searchParams;
+
+  return <PasswordResetPage token={params.token} />;
 }

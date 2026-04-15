@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { resetPasswordAction } from "@/lib/actions/auth-actions";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function PasswordResetPage({ token }: { token?: string }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,14 +30,16 @@ export default function PasswordResetPage({ token }: { token?: string }) {
   ];
 
   const handleSubmit = async () => {
-    if (!token) return;
+    if (!token) return toast("No valid token!");
     const result = await resetPasswordAction(token, password);
 
     if (result.success) {
       alert("Password updated!");
       router.push("/auth");
+      console.log("Passed");
     } else {
       alert(result.error);
+      console.error("Failed");
     }
   };
 
