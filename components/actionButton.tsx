@@ -19,7 +19,7 @@ export function ActionButton({
       className={cn(
         "w-full bg-[#f26722] text-[#0e0e0e] py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest",
         "flex items-center justify-center gap-4 shadow-[0_12px_40px_rgba(242,103,34,0.3)]",
-        "hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative",
+        "hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative cursor-pointer",
         className,
       )}
       {...props}

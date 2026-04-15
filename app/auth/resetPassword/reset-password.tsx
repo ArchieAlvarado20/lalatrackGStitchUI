@@ -15,6 +15,7 @@ import {
 import { resetPasswordAction } from "@/lib/actions/auth-actions";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 export default function PasswordResetPage({ token }: { token?: string }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,24 +23,40 @@ export default function PasswordResetPage({ token }: { token?: string }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
+  const [error, setError] = useState("");
 
   const requirements = [
     { label: "At least 8 characters", met: password.length >= 8 },
     { label: "One special character (!@#$)", met: /[!@#$%^&*]/.test(password) },
     { label: "Must include one number", met: /\d/.test(password) },
+    {
+      label: "Match Password",
+      met: password === confirmPassword && !!password && !!confirmPassword,
+    },
   ];
 
-  const handleSubmit = async () => {
-    if (!token) return toast("No valid token!");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!token) {
+      return setError("No valid token!");
+    }
+
+    const allValid = requirements.every((req) => req.met);
+
+    if (!allValid) {
+      toast.error("Please meet all password requirements");
+      return;
+    }
+
     const result = await resetPasswordAction(token, password);
 
     if (result.success) {
-      alert("Password updated!");
+      toast.success("Password updated!");
       router.push("/auth");
       console.log("Passed");
     } else {
-      alert(result.error);
-      console.error("Failed");
+      toast.error("Failed to update password");
     }
   };
 
@@ -54,6 +71,41 @@ export default function PasswordResetPage({ token }: { token?: string }) {
       </Head>
 
       <main className="flex-1 flex flex-col items-center justify-start p-6 pt-12 max-w-sm mx-auto w-full">
+        {error && (
+          <div className="relative mb-2 flex items-start gap-1 m-auto rounded-2xl border border-red-500/20 bg-red-500/10 backdrop-blur-md p-4 shadow-lg">
+            {/* Icon */}
+            <div className="shrink-0 mt-0.5">
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-300">{error}</p>
+              <p className="text-xs text-red-200/70 mt-1">
+                Please check the link on your email.
+              </p>
+            </div>
+
+            {/* Optional close button */}
+            <button
+              onClick={() => setError("")}
+              className="text-red-300 hover:text-red-200 transition"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Visual Brand Accent */}
         <div className="w-24 h-24 bg-[#131313] rounded-3xl flex items-center justify-center text-[#f26722] border border-white/5 mb-12 shadow-[0_0_40px_rgba(242,103,34,0.1)]">
           <RefreshCw
@@ -173,6 +225,16 @@ export default function PasswordResetPage({ token }: { token?: string }) {
             />
           </button>
         </form>
+
+        {/* Footer Navigation */}
+        <div className="mt-12 text-center">
+          <Link
+            href="/auth"
+            className="text-xs text-on-surface-variant font-bold hover:text-white transition-colors flex items-center gap-2"
+          >
+            <ArrowLeft size={14} /> Back to Login
+          </Link>
+        </div>
       </main>
 
       {/* Decorative Progress Line */}
