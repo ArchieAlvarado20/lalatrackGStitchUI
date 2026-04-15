@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-72px)]">
+    <div className="flex items-center justify-center min-h-screen -mt-32">
       {/* Spinner container */}
       <div className="relative flex items-center justify-center my-auto">
         {/* Spinner */}

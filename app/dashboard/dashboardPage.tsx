@@ -139,8 +139,7 @@ export default function DashboardPage({ session }: { session: Session }) {
               </span>
             </div>
             <p className="text-[10px] uppercase tracking-[0.4em] text-[#adaaaa] mb-2 font-black">
-              Real-time Income(₱{Number(income)}) - Expenses ( ₱
-              {Number(expenseAmount)})
+              Real-time Daily Profit Monitoring
             </p>
             <div className="flex items-end justify-center gap-2 mb-2">
               <h2 className="text-7xl font-black text-[#f26722] tracking-tighter italic">
@@ -150,18 +149,23 @@ export default function DashboardPage({ session }: { session: Session }) {
                 PHP
               </span>
             </div>
+            <div className="flex justify-center text-center text-[10px] uppercase tracking-[0.4em] text-[#adaaaa] mb-2 font-black">
+              income(<p className="text-[#f26722]">₱{Number(income)}</p>) -
+              expense(
+              <p className="text-[#f26722]">₱{Number(expenseAmount)}</p>)
+            </div>
           </section>
           {/* Goal Progress Grid */}
           <section className="grid grid-cols-2 gap-4 mb-12 w-full items-stretch">
-            <LockedFeature label="Coming Soon">
-              <StatCard
-                label="Daily Goal"
-                value="$142 / $200"
-                percentage={75}
-                color="#f26722"
-                subtext="Warning: High Traffic"
-              />
-            </LockedFeature>
+            {/* <LockedFeature label="Coming Soon"> */}
+            <StatCard
+              label="Daily Goal"
+              value="$142 / $200"
+              percentage={75}
+              color="#f26722"
+              subtext="Warning: High Traffic"
+            />
+            {/* </LockedFeature> */}
 
             <LockedFeature label="Coming Soon">
               <StatCard
