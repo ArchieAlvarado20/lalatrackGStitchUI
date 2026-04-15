@@ -1,6 +1,5 @@
 "use server";
 import prisma from "../prisma";
-import { getTodayExpenseAmount } from "./expense-actions";
 
 export async function createRide(data: {
   fare: number;
@@ -109,11 +108,4 @@ export async function getRideTotal(userId: string) {
   });
 
   return Number(result._sum.payment ?? 0);
-}
-
-export async function getTodayNetIncome(userId: string) {
-  const rides = await getTodayIncome(userId);
-  const expense = await getTodayExpenseAmount(userId);
-
-  return rides - expense;
 }

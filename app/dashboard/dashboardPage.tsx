@@ -26,6 +26,8 @@ import {
   getTodayExpenseAmount,
 } from "@/lib/actions/expense-actions";
 import Loading from "@/components/loading";
+import toast from "react-hot-toast";
+import { endShift, startShift } from "@/lib/actions/shift.actions";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -58,6 +60,7 @@ export default function DashboardPage({ session }: { session: Session }) {
   const [expenseAmount, setExpenseAmount] = useState<number>(0);
   const [expense, setExpense] = useState<Expense[]>([]);
   const [netIncome, setNetIncome] = useState<number>(0);
+  const [shift, setShift] = useState(false);
 
   const loadNetIncome = async () => {
     const result = await getTodayNetIncome(session.user.id);
@@ -120,6 +123,42 @@ export default function DashboardPage({ session }: { session: Session }) {
     init();
   }, []);
 
+  const handleStartShift = async () => {
+    try {
+      setIsLoading(true);
+
+      await startShift({
+        userId: session.user.id,
+      });
+
+      setShift(true);
+
+      toast.success("Shift started!");
+    } catch (err) {
+      toast.error("Failed to start shift");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEndShift = async () => {
+    try {
+      setIsLoading(true);
+
+      await endShift({
+        userId: session.user.id,
+      });
+
+      setShift(false);
+
+      toast.success("Shift ended!");
+    } catch (err) {
+      toast.error("Failed to end shift");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <TopAppBar session={session} />
@@ -151,7 +190,7 @@ export default function DashboardPage({ session }: { session: Session }) {
             </div>
             <div className="flex justify-center text-center text-[10px] uppercase tracking-[0.4em] text-[#adaaaa] mb-2 font-black">
               income(<p className="text-[#f26722]">₱{Number(income)}</p>) -
-              expense(
+              expenses(
               <p className="text-[#f26722]">₱{Number(expenseAmount)}</p>)
             </div>
           </section>
@@ -285,18 +324,22 @@ export default function DashboardPage({ session }: { session: Session }) {
 
             <div className="space-y-3 mt-5"></div>
           </section>
-          <LockedFeature label="Coming Soon">
-            {/* Action Button */}
-            <button className="w-full bg-[#f26722] text-[#0e0e0e] py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-4 shadow-[0_12px_40px_rgba(242,103,34,0.3)] hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative">
-              <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
-              <Power size={28} strokeWidth={3} className="animate-pulse" />
-              START SHIFT
-              <ArrowRight
-                size={20}
-                className="group-hover:translate-x-2 transition-transform"
-              />
-            </button>
-          </LockedFeature>
+          {/* <LockedFeature label="Coming Soon"> */}
+          {/* Action Button */}
+          <button
+            onClick={!shift ? handleStartShift : handleEndShift}
+            className="w-full bg-[#f26722] text-[#0e0e0e] py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-4 shadow-[0_12px_40px_rgba(242,103,34,0.3)] hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative"
+          >
+            <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
+            <Power size={28} strokeWidth={3} className="animate-pulse" />
+            {shift ? "STOP SHIFT" : "START SHIFT"}
+
+            <ArrowRight
+              size={20}
+              className="group-hover:translate-x-2 transition-transform"
+            />
+          </button>
+          {/* </LockedFeature> */}
         </main>
       )}
 

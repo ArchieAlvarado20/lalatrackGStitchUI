@@ -19,6 +19,7 @@ model User {
   accounts      Account[]
   rides         Ride[]
   expenses      Expense[]
+  shift         Shift[]
   sessions      Session[]
 
   @@map("user")
@@ -101,4 +102,30 @@ model Expense{
 
   @@map("expenses")
   @@index([userId])
+}
+
+model Shift {
+  id        String   @id @default(cuid())
+
+  userId    String
+
+  startTime DateTime
+  endTime   DateTime?
+
+  status    ShiftStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user      User @relation(fields: [userId], references: [id])
+
+  @@map("shift")
+  @@index([userId])
+  @@index([userId, status])
+}
+
+enum ShiftStatus {
+  ACTIVE
+  ENDED
 }
