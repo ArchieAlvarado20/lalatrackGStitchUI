@@ -69,6 +69,7 @@ export async function activeShift(data: { userId: string }) {
       userId: data.userId,
       status: "ACTIVE",
       deletedAt: null,
+      endTime: null,
     },
     orderBy: {
       startTime: "desc",

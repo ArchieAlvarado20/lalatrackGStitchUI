@@ -16,7 +16,7 @@ import BottomNavBar from "@/components/bottomNavBar";
 import LogItem from "@/components/logItem";
 import StatCard from "@/components/statCard";
 import { auth } from "@/lib/auth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getTodayRides, getTodayTip } from "@/lib/actions/logs-actions";
 import { getTodayNetIncome } from "@/lib/actions/dashboard.action";
 import LockedFeature from "@/components/lockedFeature";
@@ -28,6 +28,8 @@ import {
 import Loading from "@/components/loading";
 import toast from "react-hot-toast";
 import { activeShift, endShift, startShift } from "@/lib/actions/shift.actions";
+import { ActionButton } from "@/components/actionButton";
+import TipCard from "@/components/tipCard";
 
 type Session = typeof auth.$Infer.Session;
 
@@ -59,15 +61,20 @@ export default function DashboardPage({ session }: { session: Session }) {
   const [expenseAmount, setExpenseAmount] = useState<number>(0);
   const [expense, setExpense] = useState<Expense[]>([]);
   const [netIncome, setNetIncome] = useState<number>(0);
-  const [shift, setShift] = useState(false);
+  const [tip, setTip] = useState<number>(0);
   const [activeShiftTime, setActiveShiftTime] = useState(0);
-  const hasActiveShift = !!activeShiftTime;
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadNetIncome = async () => {
     const result = await getTodayNetIncome(session.user.id);
     setNetIncome(result.net);
     setIncome(result.rides);
     setExpenseAmount(result.expense);
+  };
+
+  const loadTip = async () => {
+    const tip = await getTodayTip(session.user.id);
+    setTip(tip);
   };
 
   const loadLogs = async () => {
@@ -108,14 +115,21 @@ export default function DashboardPage({ session }: { session: Session }) {
     const result = await activeShift({
       userId: session.user.id,
     });
+
     const start = result?.startTime;
 
-    setInterval(() => {
-      if (start) {
+    // clear existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    if (start) {
+      intervalRef.current = setInterval(() => {
         const time = Date.now() - new Date(start).getTime();
-        setActiveShiftTime(time ?? null);
-      }
-    }, 1000);
+        setActiveShiftTime(time);
+        console.log(time);
+      }, 1000);
+    }
   };
 
   const hours = Math.floor(activeShiftTime / (1000 * 60 * 60));
@@ -131,6 +145,7 @@ export default function DashboardPage({ session }: { session: Session }) {
         loadExpense(),
         loadNetIncome(),
         loadActiveShift(),
+        loadTip(),
       ]);
       setActiveShiftTime(activeShiftTime);
       setIsLoading(false);
@@ -144,9 +159,7 @@ export default function DashboardPage({ session }: { session: Session }) {
       await startShift({
         userId: session.user.id,
       });
-
-      setActiveShiftTime(activeShiftTime);
-
+      await loadActiveShift();
       toast.success("Shift started!");
     } catch (err: unknown) {
       const message =
@@ -161,8 +174,12 @@ export default function DashboardPage({ session }: { session: Session }) {
         userId: session.user.id,
       });
 
-      setShift(false);
-      setActiveShiftTime(0);
+      // STOP the timer
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      setActiveShiftTime(0); // force reset
 
       toast.success("Shift ended!");
     } catch (err: unknown) {
@@ -171,7 +188,6 @@ export default function DashboardPage({ session }: { session: Session }) {
       toast.error(message);
     }
   };
-
   return (
     <>
       <TopAppBar session={session} />
@@ -184,7 +200,7 @@ export default function DashboardPage({ session }: { session: Session }) {
         
         <SkeletonCard size="lg" /> */}
           <section className="text-center mb-12">
-            {hasActiveShift || shift ? (
+            {activeShiftTime > 0 ? (
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#131313] border border-white/5 rounded-full mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
 
@@ -216,15 +232,15 @@ export default function DashboardPage({ session }: { session: Session }) {
           </section>
           {/* Goal Progress Grid */}
           <section className="grid grid-cols-2 gap-4 mb-12 w-full items-stretch">
-            {/* <LockedFeature label="Coming Soon"> */}
-            <StatCard
-              label="Daily Goal"
-              value="$142 / $200"
-              percentage={75}
-              color="#f26722"
-              subtext="Warning: High Traffic"
-            />
-            {/* </LockedFeature> */}
+            <LockedFeature label="Coming Soon">
+              <StatCard
+                label="Daily Goal"
+                value="$142 / $200"
+                percentage={75}
+                color="#f26722"
+                subtext="Warning: High Traffic"
+              />
+            </LockedFeature>
 
             <LockedFeature label="Coming Soon">
               <StatCard
@@ -236,6 +252,10 @@ export default function DashboardPage({ session }: { session: Session }) {
               />
             </LockedFeature>
           </section>
+          <div className="my-3">
+            <TipCard amount={Number(tip)} isLoading={isLoading} />
+          </div>
+
           {/* Recent Logs Section */}
           <section className="mb-10">
             <div className="flex items-center justify-between mb-6">
@@ -346,19 +366,25 @@ export default function DashboardPage({ session }: { session: Session }) {
           </section>
           {/* <LockedFeature label="Coming Soon"> */}
           {/* Action Button */}
-          <button
+          <ActionButton
             onClick={activeShiftTime > 0 ? handleEndShift : handleStartShift}
-            className={`w-full text-[#0e0e0e] py-6 rounded-[2rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden relative cursor-pointer  ${activeShiftTime > 0 ? "bg-[#59b602] shadow-[0_12px_40px_rgba(22,163,74,0.3)]" : "bg-[#f26722] shadow-[0_12px_40px_rgba(242,103,34,0.3)] "}`}
-          >
-            <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
-            <Power size={28} strokeWidth={3} className="animate-pulse" />
-            {activeShiftTime > 0 ? "END SHIFT" : "START SHIFT"}
+            label={activeShiftTime > 0 ? "END SHIFT" : "START SHIFT"}
+            leftIcon={
+              <Power size={28} strokeWidth={3} className="animate-pulse" />
+            }
+            rightIcon={
+              <ArrowRight
+                size={20}
+                className="group-hover:translate-x-2 transition-transform"
+              />
+            }
+            className={
+              activeShiftTime > 0
+                ? "bg-[#59b602] shadow-[0_12px_40px_rgba(22,163,74,0.3)]"
+                : "bg-[#f26722] shadow-[0_12px_40px_rgba(242,103,34,0.3)]"
+            }
+          />
 
-            <ArrowRight
-              size={20}
-              className="group-hover:translate-x-2 transition-transform"
-            />
-          </button>
           {/* </LockedFeature> */}
         </main>
       )}
