@@ -57,7 +57,7 @@ type Expense = {
 export default function DashboardPage({ session }: { session: Session }) {
   const [rides, setRides] = useState<Ride[]>([]);
   const [income, setIncome] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [expenseAmount, setExpenseAmount] = useState<number>(0);
   const [expense, setExpense] = useState<Expense[]>([]);
   const [netIncome, setNetIncome] = useState<number>(0);
@@ -155,12 +155,14 @@ export default function DashboardPage({ session }: { session: Session }) {
   }, []);
 
   const handleStartShift = async () => {
+    setIsLoading(true);
     try {
       await startShift({
         userId: session.user.id,
       });
       await loadActiveShift();
       toast.success("Shift started!");
+      setIsLoading(false);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Failed to start shift";
@@ -169,6 +171,7 @@ export default function DashboardPage({ session }: { session: Session }) {
   };
 
   const handleEndShift = async () => {
+    setIsLoading(true);
     try {
       await endShift({
         userId: session.user.id,
@@ -180,7 +183,7 @@ export default function DashboardPage({ session }: { session: Session }) {
       }
 
       setActiveShiftTime(0); // force reset
-
+      setIsLoading(false);
       toast.success("Shift ended!");
     } catch (err: unknown) {
       const message =

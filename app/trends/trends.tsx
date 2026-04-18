@@ -13,13 +13,17 @@ type Session = typeof auth.$Infer.Session;
 
 type WeeklyData = {
   label: string;
-  val: number;
+  payment: number;
   active: boolean;
+  fare: number;
+  tip: number;
 };
 
 export default function TrendPage({ session }: { session: Session }) {
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
-  const [selectedTotal, setSelectedTotal] = useState(0);
+  const [selectedFare, setSelectedFare] = useState(0.0);
+  const [selectedPayment, setSelectedPayment] = useState(0.0);
+  const [selectedTip, setSelectedTip] = useState(0.0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const loadData = async () => {
@@ -30,7 +34,9 @@ export default function TrendPage({ session }: { session: Session }) {
         month: "short",
         day: "numeric",
       }),
-      val: d.total,
+      payment: d.payment,
+      fare: d.fare,
+      tip: d.tip,
       active: i === result.length - 1,
     }));
 
@@ -65,6 +71,90 @@ export default function TrendPage({ session }: { session: Session }) {
             </button>
           ))}
         </div>
+
+        {/* Weekly Earnings Chart */}
+        <section className="bg-[#131313] p-4 rounded-2xl  border border-white/5">
+          <div className="overflow-x-auto">
+            <div className="flex gap-1 px-1 min-w-max pb-2">
+              {weeklyData.map((d, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col items-center justify-end w-12 flex-shrink-0 group"
+                >
+                  {/* 💰 Value */}
+                  <div className="text-[8px] font-black text-[#f26722] mb-2 opacity-0 group-hover:opacity-100 transition-all shadow-[0_12px_40px_rgba(242,103,34,0.3)]">
+                    ₱{d.payment}
+                  </div>
+
+                  {/* 📊 Bar Container */}
+                  <div className="h-48 flex items-end">
+                    <div
+                      onClick={() => {
+                        setSelectedFare(d.fare);
+                        setSelectedPayment(d.payment);
+                        setSelectedTip(d.tip);
+                        setActiveIndex(i);
+                      }}
+                      className={`w-6 rounded-t-md shadow-[0_12px_40px_rgba(242,103,34,0.3)] transition-all duration-500 hover:scale-105   ${
+                        activeIndex === i ? "bg-[#f26729]" : "bg-[#f26722]"
+                      }`}
+                      style={{
+                        height: `${Math.max(d.payment * 0.05, 30)}px`,
+                      }}
+                    ></div>
+                  </div>
+
+                  {/* 📅 Label */}
+                  <span className="text-[8px] font-black tracking-widest text-[#adaaaa] mt-2 group-hover:text-[#f26722]transition-all">
+                    {d.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="-mt-2 mb-8">
+            <h3 className="text-2xl tracking-tighter uppercase mb-1 text-center">
+              Total Income
+            </h3>
+            <div className=" flex items-center justify-between group">
+              <div>
+                <p className="text-[15px] font-sans font-bold text-[#adaaaa] uppercase tracking-widest">
+                  Total Cash Collected
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[20px] font-black text-[#ffffff] tracking-tighter">
+                  ₱{selectedPayment.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div className=" flex items-center justify-between group">
+              <div>
+                <p className="text-[15px]font-sans   font-bold text-[#adaaaa] uppercase tracking-widest">
+                  Total Fare Amount
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[20px] font-black text-[#ffffff] tracking-tighter">
+                  ₱{selectedFare.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div className=" flex items-center justify-between group">
+              <div>
+                <p className="text-[15px] font-sans font-bold text-[#adaaaa] uppercase tracking-widest">
+                  Total Tip Acquired
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[20px] font-black text-[#ffffff] tracking-tighter">
+                  ₱{selectedTip.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Monthly Goal Progress */}
         <section className="bg-[#131313] p-8 rounded-[2.5rem] border border-white/5 flex flex-col items-center relative overflow-hidden group hover:border-[#f26722]/30 transition-all duration-500">
@@ -147,64 +237,6 @@ export default function TrendPage({ session }: { session: Session }) {
             <p className="text-[8px] font-bold text-[#adaaaa] uppercase tracking-tighter">
               Avg Earnings
             </p>
-          </div>
-        </section>
-
-        {/* Weekly Earnings Chart */}
-        <section className="bg-[#131313] p-4 rounded-2xl  border border-white/5">
-          <div className="overflow-x-auto">
-            <div className="flex gap-1 px-1 min-w-max pb-2">
-              {weeklyData.map((d, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-center justify-end w-12 flex-shrink-0 group"
-                >
-                  {/* 💰 Value */}
-                  <div className="text-[8px] font-black text-[#f26722] mb-2 opacity-0 group-hover:opacity-100 transition-all shadow-[0_12px_40px_rgba(242,103,34,0.3)]">
-                    ₱{d.val}
-                  </div>
-
-                  {/* 📊 Bar Container */}
-                  <div className="h-48 flex items-end">
-                    <div
-                      onClick={() => {
-                        setSelectedTotal(d.val);
-                        setActiveIndex(i);
-                      }}
-                      className={`w-6 rounded-t-md shadow-[0_12px_40px_rgba(242,103,34,0.3)] transition-all duration-500 hover:scale-105   ${
-                        activeIndex === i ? "bg-[#f26722]" : "bg-[#ffffff]"
-                      }`}
-                      style={{
-                        height: `${Math.max(d.val * 0.05, 30)}px`,
-                      }}
-                    ></div>
-                  </div>
-
-                  {/* 📅 Label */}
-                  <span className="text-[8px] font-black tracking-widest text-[#adaaaa] mt-2 group-hover:text-[#f26722]transition-all">
-                    {d.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <h3 className="text-2xl font-black italic tracking-tighter uppercase mb-1">
-                  Weekly Earnings
-                </h3>
-                <p className="text-[10px] font-bold text-[#adaaaa] uppercase tracking-widest">
-                  Last 7 days performance
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-black text-[#f26722] italic tracking-tighter">
-                  ₱{selectedTotal}
-                </p>
-                <p className="text-[8px] font-bold text-[#adaaaa] uppercase tracking-widest">
-                  Total This Week
-                </p>
-              </div>
-            </div>
           </div>
         </section>
 
